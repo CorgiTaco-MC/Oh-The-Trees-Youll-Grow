@@ -1,11 +1,7 @@
 package dev.corgitaco.ohthetreesyoullgrow.platform;
 
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 
 import java.nio.file.Path;
 import java.util.ServiceLoader;
@@ -31,27 +27,7 @@ public interface ModPlatform {
 
     boolean isModLoaded(String isLoaded);
 
-
-    String tagNameSpace();
-
-    String curseForgeURL();
-
-    boolean isClientEnvironment();
-
     Platform modPlatform();
-
-    boolean hasLoadErrors();
-
-    boolean isDevEnvironment();
-
-    void addTagsUpdatedListener(TagsUpdatedEvent event);
-
-    boolean canTreeGrowWithEvent(Level level, RandomSource source, BlockPos pos);
-
-    @FunctionalInterface
-    interface TagsUpdatedEvent {
-        void onTagsUpdated(RegistryAccess access);
-    }
 
     <T> Supplier<T> register(Registry<? super T> registry, String name, Supplier<T> value);
 
