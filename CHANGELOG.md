@@ -1,3 +1,6 @@
+# 1.3.2
+* Fix adding and sort trunk/leave positions and leaves to their respective sets. Fixes various issues with tree decorators.
+
 # 1.3.1
 * Add check to prevent logs from being placed where bedrock is present
 * Fix TREE_FROM_NBT_V1 not being final
