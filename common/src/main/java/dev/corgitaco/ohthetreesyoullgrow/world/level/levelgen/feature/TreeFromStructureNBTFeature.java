@@ -5,6 +5,7 @@ import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -86,8 +87,9 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             throw new UnsupportedOperationException(String.format("\"%s\" is missing log builders.", baseLocation));
         }
 
-        Set<BlockPos> leavePositions = new HashSet<>();
-        Set<BlockPos> trunkPositions = new HashSet<>();
+        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin));
+        Set<BlockPos> leavePositions = new TreeSet<>(comparator);
+        Set<BlockPos> trunkPositions = new TreeSet<>(comparator);
 
         int trunkLength = config.height().sample(random);
         final int maxTrunkBuildingDepth = config.maxLogDepth();
@@ -126,7 +128,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
     }
 
     public static void placeTrunk(TreeFromStructureNBTConfig config, BlockStateProvider logProvider, BlockStateProvider leavesProvider, WorldGenLevel level, BlockPos origin, RandomSource random, StructurePlaceSettings placeSettings, StructureTemplate.Palette trunkBasePalette, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, List<StructureTemplate.StructureBlockInfo> logBuilders, Set<BlockPos> leavePositions, Set<BlockPos> trunkPositions, int maxTrunkBuildingDepth) {
-        fillLogsUnder(random, logProvider, level, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn());
+        fillLogsUnder(random, logProvider, level, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn(), trunkPositions);
         placeLogsWithRotation(logProvider, level, origin, random, placeSettings, centerOffset, logs, trunkPositions);
         placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, random, placeSettings, getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), trunkBasePalette), leavePositions, centerOffset, config.leavesPlacementFilter());
         placeAdditional(config, level, origin, placeSettings, trunkBasePalette, centerOffset);
@@ -149,7 +151,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         canopyCenterOffset = new BlockPos(-canopyCenterOffset.getX(), trunkLength, -canopyCenterOffset.getZ());
 
         List<StructureTemplate.StructureBlockInfo> trunkFillers = new ArrayList<>(randomCanopyPalette.blocks(Blocks.RED_WOOL));
-        fillLogsUnder(random, logProvider, level, origin, placeSettings, canopyCenterOffset, trunkFillers, trunkLength + 1, BlockPredicate.matchesBlocks(config.logTarget().toArray(new Block[0])));
+        fillLogsUnder(random, logProvider, level, origin, placeSettings, canopyCenterOffset, trunkFillers, trunkLength + 1, BlockPredicate.matchesBlocks(config.logTarget().toArray(new Block[0])), trunkPositions);
 
 
         placeLogsWithRotation(logProvider, level, origin, random, placeSettings, canopyCenterOffset, canopyLogs, trunkPositions);
@@ -162,7 +164,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         for (StructureTemplate.StructureBlockInfo trunk : logs) {
             BlockPos pos = getModifiedPos(placeSettings, trunk, centerOffset, origin);
             level.setBlock(pos, getTransformedState(pos, logProvider.getState(random, pos), trunk.state(), placeSettings.getRotation(), level), 2);
-            trunkPositions.add(pos);
+            trunkPositions.add(pos.immutable());
         }
     }
 
@@ -181,6 +183,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                 BlockState state = getTransformedState(modifiedPos, leavesProvider.getState(random, modifiedPos), leaf.state(), placeSettings.getRotation(), level);
 
                 level.setBlock(modifiedPos, state, 2);
+                leavePositions.add(modifiedPos.immutable());
                 BlockState finalState = state;
                 if (state.hasProperty(LeavesBlock.DISTANCE)) {
                     Runnable postProcess = () -> {
@@ -194,18 +197,17 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                             level.scheduleTick(modifiedPos, blockState.getBlock(), 0);
                         } else {
                             level.removeBlock(modifiedPos, false);
+                            leavePositions.remove(modifiedPos.immutable());
                         }
                     };
                     leavesPostApply.add(postProcess);
-                } else {
-                    leavePositions.add(modifiedPos);
                 }
             }
         }
         leavesPostApply.forEach(Runnable::run);
     }
 
-    public static void fillLogsUnder(RandomSource randomSource, BlockStateProvider logProvider, WorldGenLevel level, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, BlockPredicate groundFilter) {
+    public static void fillLogsUnder(RandomSource randomSource, BlockStateProvider logProvider, WorldGenLevel level, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, BlockPredicate groundFilter, Set<BlockPos> trunkPositions) {
         for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
             BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos().set(pos);
@@ -221,6 +223,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
                     state = Block.updateFromNeighbourShapes(state, level, mutableBlockPos);
                     level.setBlock(mutableBlockPos, state, 2);
+                    trunkPositions.add(mutableBlockPos.immutable());
                     mutableBlockPos.move(Direction.DOWN);
                 } else {
                     ((RandomTickScheduler) level.getChunk(mutableBlockPos)).scheduleRandomTick(mutableBlockPos.immutable());
