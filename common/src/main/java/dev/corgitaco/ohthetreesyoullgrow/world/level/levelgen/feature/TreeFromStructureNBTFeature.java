@@ -26,6 +26,7 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTConfig> {
 
@@ -87,9 +88,8 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             throw new UnsupportedOperationException(String.format("\"%s\" is missing log builders.", baseLocation));
         }
 
-        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin));
-        Set<BlockPos> leavePositions = new TreeSet<>(comparator);
-        Set<BlockPos> trunkPositions = new TreeSet<>(comparator);
+        Set<BlockPos> leavePositions = new HashSet<>();
+        Set<BlockPos> trunkPositions = new HashSet<>();
 
         int trunkLength = config.height().sample(random);
         final int maxTrunkBuildingDepth = config.maxLogDepth();
@@ -114,7 +114,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             placeCanopy(config, logProvider, leavesProvider, level, origin, random, placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength, config.growableOn());
         }
 
-        placeTreeDecorations(config.treeDecorators(), level, random, leavePositions, trunkPositions);
+        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin));
+        LinkedHashSet<BlockPos> sortedTrunkPositions = trunkPositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<BlockPos> sortedLeavePositions = leavePositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
+        placeTreeDecorations(config.treeDecorators(), level, random, sortedLeavePositions, sortedTrunkPositions);
 
         return true;
     }
@@ -184,17 +187,17 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
                 level.setBlock(modifiedPos, state, 2);
                 leavePositions.add(modifiedPos.immutable());
-                BlockState finalState = state;
                 if (state.hasProperty(LeavesBlock.DISTANCE)) {
                     Runnable postProcess = () -> {
-                        BlockState blockState = LeavesBlock.updateDistance(finalState, level, modifiedPos);
+                        BlockState blockState = LeavesBlock.updateDistance(state, level, modifiedPos);
                         if (blockState.getValue(LeavesBlock.DISTANCE) < LeavesBlock.DECAY_DISTANCE) {
-                            leavePositions.add(modifiedPos);
+                            leavePositions.add(modifiedPos.immutable());
                             if (blockState.hasProperty(LeavesBlock.PERSISTENT)) {
                                 blockState = blockState.setValue(LeavesBlock.PERSISTENT, false);
                             }
                             level.setBlock(modifiedPos, blockState, 2);
                             level.scheduleTick(modifiedPos, blockState.getBlock(), 0);
+                            leavePositions.add(modifiedPos.immutable());
                         } else {
                             level.removeBlock(modifiedPos, false);
                             leavePositions.remove(modifiedPos.immutable());
