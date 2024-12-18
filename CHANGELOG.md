@@ -1,3 +1,6 @@
+# 5.0.5
+* Fix missing trunk/leave positions in tree decorators.
+
 # 5.0.4
 * Fix adding and sort trunk/leave positions and leaves to their respective sets. Fixes various issues with tree decorators.
 
