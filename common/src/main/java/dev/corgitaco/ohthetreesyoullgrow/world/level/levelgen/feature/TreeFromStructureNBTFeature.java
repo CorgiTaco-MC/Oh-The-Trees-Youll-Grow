@@ -114,7 +114,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             placeCanopy(config, logProvider, leavesProvider, level, origin, random, placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength, config.growableOn());
         }
 
-        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin));
+        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin.atY(0)));
         LinkedHashSet<BlockPos> sortedTrunkPositions = trunkPositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
         LinkedHashSet<BlockPos> sortedLeavePositions = leavePositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
         placeTreeDecorations(config.treeDecorators(), level, random, sortedLeavePositions, sortedTrunkPositions);
