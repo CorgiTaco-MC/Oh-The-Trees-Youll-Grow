@@ -5,7 +5,6 @@ import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -26,7 +25,6 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTConfig> {
 
@@ -90,6 +88,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         Set<BlockPos> leavePositions = new HashSet<>();
         Set<BlockPos> trunkPositions = new HashSet<>();
+        Set<BlockPos> decorationPositions = new HashSet<>();
 
         int trunkLength = config.height().sample(random);
         final int maxTrunkBuildingDepth = config.maxLogDepth();
@@ -114,10 +113,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             placeCanopy(config, logProvider, leavesProvider, level, origin, random, placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength, config.growableOn());
         }
 
-        Comparator<BlockPos> comparator = Comparator.<BlockPos>comparingInt(Vec3i::getY).thenComparingDouble(blockPos -> blockPos.atY(0).distManhattan(origin));
-        LinkedHashSet<BlockPos> sortedTrunkPositions = trunkPositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
-        LinkedHashSet<BlockPos> sortedLeavePositions = leavePositions.stream().sorted(comparator).collect(Collectors.toCollection(LinkedHashSet::new));
-        placeTreeDecorations(config.treeDecorators(), level, random, sortedLeavePositions, sortedTrunkPositions);
+        placeTreeDecorations(config.treeDecorators(), level, random, leavePositions, trunkPositions, decorationPositions);
 
         return true;
     }
@@ -171,9 +167,12 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
-    public static void placeTreeDecorations(Iterable<TreeDecorator> treeDecorators, WorldGenLevel level, RandomSource random, Set<BlockPos> leavePositions, Set<BlockPos> trunkPositions) {
+    public static void placeTreeDecorations(Iterable<TreeDecorator> treeDecorators, WorldGenLevel level, RandomSource random, Set<BlockPos> leavePositions, Set<BlockPos> trunkPositions, Set<BlockPos> decorationPositions) {
         for (TreeDecorator treeDecorator : treeDecorators) {
-            treeDecorator.place(new TreeDecorator.Context(level, (pos, state) -> level.setBlock(pos, state, 2), random, trunkPositions, leavePositions, new HashSet<>()));
+            treeDecorator.place(new TreeDecorator.Context(level, (pos, state) -> {
+                level.setBlock(pos, state, 2);
+                decorationPositions.add(pos.immutable());
+            }, random, trunkPositions, leavePositions, trunkPositions));
         }
     }
 
@@ -191,7 +190,6 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                     Runnable postProcess = () -> {
                         BlockState blockState = LeavesBlock.updateDistance(state, level, modifiedPos);
                         if (blockState.getValue(LeavesBlock.DISTANCE) < LeavesBlock.DECAY_DISTANCE) {
-                            leavePositions.add(modifiedPos.immutable());
                             if (blockState.hasProperty(LeavesBlock.PERSISTENT)) {
                                 blockState = blockState.setValue(LeavesBlock.PERSISTENT, false);
                             }
