@@ -88,7 +88,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         Set<BlockPos> leavePositions = new HashSet<>();
         Set<BlockPos> trunkPositions = new HashSet<>();
-		Set<BlockPos> decorationPositions = new HashSet<>();
+        Set<BlockPos> decorationPositions = new HashSet<>();
 
         int trunkLength = config.height().sample(random);
         final int maxTrunkBuildingDepth = config.maxLogDepth();
