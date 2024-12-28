@@ -1,3 +1,6 @@
+# 1.3.4
+* Track tree decoration positions when placing tree feature.
+
 # 1.3.3
 * Fix missing trunk/leave positions in tree decorators.
 
