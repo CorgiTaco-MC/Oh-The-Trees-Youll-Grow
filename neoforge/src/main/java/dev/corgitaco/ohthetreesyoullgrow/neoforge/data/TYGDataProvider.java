@@ -23,6 +23,6 @@ class TYGDataProvider {
     @SubscribeEvent
     private static void onGatherData(GatherDataEvent event) {
         final DataGenerator gen = event.getGenerator();
-        gen.addProvider(event.includeServer(), new DatapackBuiltinEntriesProvider(gen.getPackOutput(), event.getLookupProvider(), BUILDER, Set.of(Constants.MOD_ID)));
+        gen.addProvider(true, new DatapackBuiltinEntriesProvider(gen.getPackOutput(), event.getLookupProvider(), BUILDER, Set.of(Constants.MOD_ID)));
     }
 }
