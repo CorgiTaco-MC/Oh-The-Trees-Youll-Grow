@@ -7,7 +7,7 @@
   "mixins": [
     "MixinServerLevel",
     "chunk.MixinChunkAccess",
-    "chunk.MixinChunkSerializer",
+    "chunk.SerializableChunkDataMixin",
     "chunk.MixinLevelChunk"
   ],
   "client": [
