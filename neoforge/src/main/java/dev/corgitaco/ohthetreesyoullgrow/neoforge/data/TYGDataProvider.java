@@ -21,7 +21,7 @@ class TYGDataProvider {
             .add(Registries.PLACED_FEATURE, context -> TYGPlacedFeatures.PLACED_FEATURE_FACTORIES.forEach((placedFeatureResourceKey, placedFeatureFactory) -> context.register(placedFeatureResourceKey, placedFeatureFactory.generate(context.lookup(Registries.CONFIGURED_FEATURE)))));
 
     @SubscribeEvent
-    private static void onGatherData(GatherDataEvent event) {
+    private static void onGatherData(GatherDataEvent.Server event) {
         final DataGenerator gen = event.getGenerator();
         gen.addProvider(true, new DatapackBuiltinEntriesProvider(gen.getPackOutput(), event.getLookupProvider(), BUILDER, Set.of(Constants.MOD_ID)));
     }
