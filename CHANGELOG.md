@@ -1,3 +1,6 @@
+# 6.0.0
+* Port to 1.21.4
+
 # 5.0.6
 * Track tree decoration positions when placing tree feature.
 
