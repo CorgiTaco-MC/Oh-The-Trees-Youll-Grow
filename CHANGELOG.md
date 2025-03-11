@@ -1,3 +1,6 @@
+# 5.0.7
+* Rewrite tree growth logic to account for solid blocks and the surrounding environment prior to growing/placing.
+
 # 5.0.6
 * Track tree decoration positions when placing tree feature.
 
