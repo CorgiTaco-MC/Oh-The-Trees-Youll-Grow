@@ -75,7 +75,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             throw new IllegalArgumentException("There cannot be more than one trunk central position for structure NBT palette %s. Trunk central position is specified with white wool.".formatted(config.baseLocation()));
         }
 
-        BlockPos centerOffset = center.getFirst().pos();
+        BlockPos centerOffset = center.get(0).pos();
         centerOffset = new BlockPos(-centerOffset.getX(), 0, -centerOffset.getZ());
 
 
@@ -108,7 +108,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             if (canopyAnchor.size() > 1) {
                 throw new IllegalArgumentException("There cannot be more than one central canopy position. Canopy central position is specified with yellow wool on the trunk palette.");
             }
-            placeCanopy(config, level, getModifiedPos(placeSettings, canopyAnchor.getFirst(), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength);
+            placeCanopy(config, level, getModifiedPos(placeSettings, canopyAnchor.get(0), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength);
         } else {
             placeCanopy(config, level, origin, placeSettings, randomCanopyPalette, leavePositions, trunkPositions, trunkLength);
         }
@@ -187,7 +187,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             throw new IllegalArgumentException("There cannot be more than one canopy anchor for structure NBT palette %s. Canopy anchor is specified with white wool.".formatted(config.canopyLocation()));
         }
 
-        StructureTemplate.StructureBlockInfo structureBlockInfo = canopyAnchor.getFirst();
+        StructureTemplate.StructureBlockInfo structureBlockInfo = canopyAnchor.get(0);
         BlockPos canopyCenterOffset = structureBlockInfo.pos();
         canopyCenterOffset = new BlockPos(-canopyCenterOffset.getX(), trunkLength, -canopyCenterOffset.getZ());
 
