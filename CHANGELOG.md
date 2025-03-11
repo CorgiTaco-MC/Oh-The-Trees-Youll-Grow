@@ -1,3 +1,6 @@
+# 6.0.1
+* Rewrite tree growth logic to account for solid blocks and the surrounding environment prior to growing/placing.
+
 # 6.0.0
 * Port to 1.21.4
 
