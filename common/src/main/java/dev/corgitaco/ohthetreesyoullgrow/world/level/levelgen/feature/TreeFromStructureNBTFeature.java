@@ -210,6 +210,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
     public static void placeTreeDecorations(Iterable<TreeDecorator> treeDecorators, WorldGenLevel level, RandomSource random, Set<BlockPos> leavePositions, Set<BlockPos> trunkPositions, Set<BlockPos> decorationPositions) {
         for (TreeDecorator treeDecorator : treeDecorators) {
             treeDecorator.place(new TreeDecorator.Context(level, (pos, state) -> {
+                level.setBlock(pos, state, 2);
                 decorationPositions.add(pos.immutable());
             }, random, trunkPositions, leavePositions, trunkPositions));
         }
