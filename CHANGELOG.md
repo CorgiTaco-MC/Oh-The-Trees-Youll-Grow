@@ -1,3 +1,6 @@
+# 1.3.6
+* Fix placing tree decorator blocks.
+
 # 1.3.5
 * Rewrite tree growth logic to account for solid blocks and the surrounding environment prior to growing/placing.
 
