@@ -1,3 +1,6 @@
+# 2.0.2
+* Place decorator blocks.
+
 # 2.0.1
 * Rewrite tree growth logic to account for solid blocks and the surrounding environment prior to growing/placing.
 
