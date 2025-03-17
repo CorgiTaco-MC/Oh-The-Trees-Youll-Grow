@@ -1,3 +1,7 @@
+# 1.3.7
+* Fix log decorators placing on leaves.
+* Add more checks to fail tree growth.
+
 # 1.3.6
 * Fix placing tree decorator blocks.
 
