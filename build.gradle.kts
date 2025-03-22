@@ -2,8 +2,8 @@ import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
     id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.7-SNAPSHOT" apply false
-    id("com.gradleup.shadow") version "8.3.5" apply false
+    id("dev.architectury.loom") version "1.9-SNAPSHOT" apply false
+    id("com.gradleup.shadow") version "8.3.6" apply false
     java
     idea
     `maven-publish`
@@ -13,7 +13,7 @@ val minecraftVersion = project.properties["minecraft_version"] as String
 architectury.minecraft = minecraftVersion
 
 allprojects {
-    version = "${minecraftVersion}-${project.properties["version"]}"
+    version = project.properties["version"] as String
     group = project.properties["group"] as String
 }
 
@@ -22,7 +22,7 @@ subprojects {
     apply(plugin = "architectury-plugin")
     apply(plugin = "maven-publish")
 
-    base.archivesName.set(project.properties["archives_base_name"] as String + "-${project.name}")
+    base.archivesName.set(project.properties["archives_base_name"] as String + "-${project.name}-$minecraftVersion")
 
     val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
     loom.silentMojangMappingsLicense()
@@ -46,7 +46,7 @@ subprojects {
             parchment("org.parchmentmc.data:parchment-$minecraftVersion:${project.properties["parchment"]}@zip")
         })
 
-        compileOnly("org.jetbrains:annotations:26.0.1")
+        compileOnly("org.jetbrains:annotations:26.0.2")
         compileOnly("com.google.auto.service:auto-service:1.1.1")
         annotationProcessor("com.google.auto.service:auto-service:1.1.1")
     }
