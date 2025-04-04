@@ -271,17 +271,21 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos().set(pos);
 
-            for (int i = 0; i < maxTrunkBuildingDepth; i++) {
+            for (int i = 0; i <= maxTrunkBuildingDepth; i++) {
                 if (!trunkPositions.containsKey(mutableBlockPos)) {
                     trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level));
                     mutableBlockPos.move(Direction.DOWN);
                 } else {
-                    return true;
+                    break;
+                }
+
+                if (i == maxTrunkBuildingDepth) {
+                    return false;
                 }
             }
         }
 
-        return false;
+        return true;
     }
 
 
