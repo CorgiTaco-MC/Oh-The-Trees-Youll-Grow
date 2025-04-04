@@ -1,3 +1,6 @@
+# 6.0.4
+* Fix trunks.
+
 # 6.0.3
 * Fix log decorators placing on leaves.
 * Add more checks to fail tree growth.
