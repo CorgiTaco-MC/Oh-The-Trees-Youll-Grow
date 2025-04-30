@@ -1,3 +1,6 @@
+# 5.0.11
+* Add is sapling check. Fixes tree density issues.
+
 # 5.0.10
 * Fix trunks.
 
