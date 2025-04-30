@@ -108,8 +108,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             return false;
         }
 
-        if (validateLogPositions(logPositions, config, level)) {
-            return false; // Exit because some positions are not valid.
+        if (config.isSapling()) {
+            if (validateLogPositions(logPositions, config, level)) {
+                return false; // Exit because some positions are not valid.
+            }
         }
 
         placeKnownLogPositions(logPositions, level);
