@@ -3,9 +3,11 @@ package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -19,6 +21,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -114,6 +118,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             }
         }
 
+        if (insideStructure(logPositions, level, config)) {
+            return true; // Exit because the trunk position intersects with a structure.
+        }
+
         placeKnownLogPositions(logPositions, level);
         placeKnownLeavePositions(leavePositions, level);
 
@@ -127,6 +135,8 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         return true;
     }
 
+
+
     private static boolean fillCanopyPositions(List<StructureTemplate.StructureBlockInfo> canopyAnchor, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> logPositions, int trunkLength) {
         if (!canopyAnchor.isEmpty()) {
             if (canopyAnchor.size() > 1) {
@@ -138,13 +148,33 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
+
+    private static boolean insideStructure(Map<BlockPos, BlockState> logPositions, WorldGenLevel level, TreeFromStructureNBTConfig config) {
+        if (level instanceof WorldGenRegion region) {
+            for (BlockPos trunkPosition : logPositions.keySet()) {
+                Map<Structure, LongSet> allStructuresAt = region.structureManager.getAllStructuresAt(trunkPosition);
+                for (Structure structure : allStructuresAt.keySet()) {
+                    StructureStart structureAt = region.structureManager.getStructureAt(trunkPosition, structure);
+                    if (region.structureManager.structureHasPieceAt(trunkPosition, structureAt) && !testValidPos(config, level, trunkPosition)) {
+                        return true; // Exit because the trunk position intersects with a structure and a block in the structure
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfig config, WorldGenLevel level) {
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!config.leavesPlacementFilter().test(level, trunkPosition)) {
+            if (!testValidPos(config, level, trunkPosition)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean testValidPos(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos trunkPosition) {
+        return config.leavesPlacementFilter().test(level, trunkPosition);
     }
 
     private static void placeKnownLogPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {
