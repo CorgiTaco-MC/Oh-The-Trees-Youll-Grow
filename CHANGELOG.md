@@ -1,3 +1,6 @@
+# 5.0.12
+* Add structure checks to tree growth during world generation.
+
 # 5.0.11
 * Add is sapling check. Fixes tree density issues.
 
