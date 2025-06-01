@@ -1,3 +1,9 @@
+# 1.3.11
+* Fix block check used in structure checks for tree growth.
+
+# 1.3.10
+* Add structure checks to tree growth during world generation.
+
 # 1.3.9
 * Add is sapling check. Fixes tree density issues.
 
