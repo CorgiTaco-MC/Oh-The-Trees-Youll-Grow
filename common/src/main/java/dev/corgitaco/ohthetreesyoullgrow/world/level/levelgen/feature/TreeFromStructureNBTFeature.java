@@ -3,10 +3,13 @@ package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -14,11 +17,16 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -114,6 +122,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             }
         }
 
+        if (insideStructure(logPositions, level, config)) {
+            return false; // Exit because the trunk position intersects with a structure.
+        }
+
         placeKnownLogPositions(logPositions, level);
         placeKnownLeavePositions(leavePositions, level);
 
@@ -138,13 +150,50 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
+
+    private static boolean insideStructure(Map<BlockPos, BlockState> logPositions, WorldGenLevel level, TreeFromStructureNBTConfig config) {
+        if (level instanceof WorldGenRegion region) {
+            for (BlockPos trunkPosition : logPositions.keySet()) {
+                ChunkAccess chunk = level.getChunk(trunkPosition);
+                for (StructureStart value : chunk.getAllStarts().values()) {
+                    for (StructurePiece piece : value.getPieces()) {
+                        if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                            return true;
+                        }
+                    }
+                }
+
+                for (Map.Entry<Structure, LongSet> entry : chunk.getAllReferences().entrySet()) {
+                    Structure structure = entry.getKey();
+                    LongSet references = entry.getValue();
+                    for (long reference : references) {
+                        ChunkAccess referenceChunk = region.getChunk(ChunkPos.getX(reference), ChunkPos.getZ(reference), ChunkStatus.STRUCTURE_STARTS, true);
+                        StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
+                        if (startForStructure != null) {
+                            for (StructurePiece piece : startForStructure.getPieces()) {
+                                if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfig config, WorldGenLevel level) {
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!config.leavesPlacementFilter().test(level, trunkPosition)) {
+            if (!testValidPos(config, level, trunkPosition)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean testValidPos(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos trunkPosition) {
+        return config.leavesPlacementFilter().test(level, trunkPosition);
     }
 
     private static void placeKnownLogPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {
