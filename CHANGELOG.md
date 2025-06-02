@@ -1,4 +1,7 @@
-# 5.0.12
+# 1.3.13
+* Fix a crash relating to structure checks in tree growth.
+
+# 1.3.12
 * Concurrency safety for random scheduled ticks.
 
 # 1.3.11
