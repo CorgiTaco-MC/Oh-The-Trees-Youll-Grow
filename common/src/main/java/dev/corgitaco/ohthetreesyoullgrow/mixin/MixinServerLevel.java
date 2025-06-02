@@ -1,21 +1,30 @@
 package dev.corgitaco.ohthetreesyoullgrow.mixin;
 
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mixin(ServerLevel.class)
 public abstract class MixinServerLevel extends Level {
+
+    @Shadow @NotNull public abstract MinecraftServer getServer();
 
     protected MixinServerLevel(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
         super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
@@ -23,9 +32,11 @@ public abstract class MixinServerLevel extends Level {
 
     @Inject(method = "tickChunk", at = @At("HEAD"))
     private void tickScheduledRandomTicks(LevelChunk chunk, int randomTickSpeed, CallbackInfo ci) {
-        ((RandomTickScheduler) chunk).getScheduledRandomTicks().removeIf(scheduledPos -> {
-            chunk.getBlockState(scheduledPos).randomTick((ServerLevel) (Object) this, scheduledPos, this.random);
-            return true;
-        });
-    }
-}
+        var original = ((RandomTickScheduler) chunk).getScheduledRandomTicks();
+        if(original.isEmpty()) return;
+
+        var tmp = List.copyOf(original);
+        original.clear();
+
+        tmp.forEach(scheduledPos -> chunk.getBlockState(scheduledPos).randomTick((ServerLevel) (Object) this, scheduledPos, this.random));
+    }}
