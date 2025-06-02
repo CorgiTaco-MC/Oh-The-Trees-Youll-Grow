@@ -1,3 +1,6 @@
+# 6.0.8
+* Concurrency safety for random scheduled ticks.
+
 # 6.0.7
 * Fix crash pertaining to calling chunks out of range.
 
