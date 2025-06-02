@@ -1,3 +1,6 @@
+# 5.0.12
+* Concurrency safety for random scheduled ticks.
+
 # 1.3.11
 * Fix block check used in structure checks for tree growth.
 
