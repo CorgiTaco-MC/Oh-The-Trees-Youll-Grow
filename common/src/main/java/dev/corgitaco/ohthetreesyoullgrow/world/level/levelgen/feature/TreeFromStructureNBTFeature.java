@@ -167,7 +167,13 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                     Structure structure = entry.getKey();
                     LongSet references = entry.getValue();
                     for (long reference : references) {
-                        ChunkAccess referenceChunk = region.getChunk(ChunkPos.getX(reference), ChunkPos.getZ(reference), ChunkStatus.STRUCTURE_STARTS, true);
+                        int chunkX = ChunkPos.getX(reference);
+                        int chunkZ = ChunkPos.getZ(reference);
+                        if (!region.hasChunk(chunkX, chunkZ)) {
+                            continue;
+                        }
+                        ChunkAccess referenceChunk = region.getChunk(chunkX, chunkZ, ChunkStatus.STRUCTURE_STARTS, true);
+
                         StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
                         if (startForStructure != null) {
                             for (StructurePiece piece : startForStructure.getPieces()) {
