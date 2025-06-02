@@ -1,3 +1,6 @@
+# 6.0.7
+* Fix crash pertaining to calling chunks out of range.
+
 # 6.0.6
 * Add structure checks to tree growth during world generation.
 
