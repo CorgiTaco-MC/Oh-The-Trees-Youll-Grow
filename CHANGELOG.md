@@ -1,3 +1,6 @@
+# 5.0.14
+* Concurrency safety for random scheduled ticks.
+
 # 5.0.13
 * Fix crash pertaining to calling chunks out of range.
 
