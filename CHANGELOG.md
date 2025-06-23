@@ -1,3 +1,6 @@
+# 7.0.0
+- Update to 1.21.6
+
 # 6.0.8
 * Concurrency safety for random scheduled ticks.
 

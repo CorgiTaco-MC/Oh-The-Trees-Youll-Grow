@@ -11,6 +11,6 @@ public class OhTheTreesYoullGrowForge {
 
     public OhTheTreesYoullGrowForge(final FMLJavaModLoadingContext context) {
         CommonClass.init();
-        ForgeModPlatform.CACHED.values().forEach(deferredRegister -> deferredRegister.register(context.getModEventBus()));
+        ForgeModPlatform.CACHED.values().forEach(deferredRegister -> deferredRegister.register(context.getModBusGroup()));
     }
 }

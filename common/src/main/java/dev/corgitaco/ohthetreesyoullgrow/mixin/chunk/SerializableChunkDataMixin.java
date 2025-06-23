@@ -38,7 +38,7 @@ public class SerializableChunkDataMixin {
 
                 ListTag listTag = new ListTag();
                 for (BlockPos scheduledRandomTick : scheduledRandomTicks) {
-                    listTag.add(NbtUtils.writeBlockPos(scheduledRandomTick));
+                    listTag.add(new IntArrayTag(new int[]{scheduledRandomTick.getX(), scheduledRandomTick.getY(), scheduledRandomTick.getZ()}));
                 }
                 corgiLibTag.put("scheduled_random_ticks", listTag);
 
@@ -50,9 +50,9 @@ public class SerializableChunkDataMixin {
     @Inject(method = "read", at = @At("HEAD"))
     private void readScheduledRandomTicks(ServerLevel level, PoiManager poiManager, RegionStorageInfo regionStorageInfo, ChunkPos pos, CallbackInfoReturnable<ProtoChunk> cir) {
         if (this.structureData.contains(Constants.MOD_ID)) {
-            CompoundTag corgiLibTag = this.structureData.getCompound(Constants.MOD_ID);
-            if (corgiLibTag.contains("scheduled_random_ticks", Tag.TAG_LIST)) {
-                for (Tag scheduledTick : corgiLibTag.getList("scheduled_random_ticks", Tag.TAG_COMPOUND)) {
+            CompoundTag corgiLibTag = this.structureData.getCompoundOrEmpty(Constants.MOD_ID);
+            if (corgiLibTag.contains("scheduled_random_ticks")) {
+                for (Tag scheduledTick : corgiLibTag.getListOrEmpty("scheduled_random_ticks")) {
                     int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
                     ((RandomTickScheduler) cir.getReturnValue()).getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
                 }
