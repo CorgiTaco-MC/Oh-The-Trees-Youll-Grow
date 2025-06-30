@@ -77,7 +77,7 @@ publisher {
     displayName.set("${project.properties["mod_name"]}-Fabric-$minecraftVersion-${project.version}")
     changelog.set(projectDir.toPath().parent.resolve("CHANGELOG.md").toFile().readText())
     artifact.set(tasks.remapJar)
-    setGameVersions(minecraftVersion)
+    setGameVersions(minecraftVersion, "1.21.6")
     setLoaders(ModLoader.FABRIC, ModLoader.QUILT)
     setCurseEnvironment(CurseEnvironment.SERVER)
     setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22)
