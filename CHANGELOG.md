@@ -1,3 +1,6 @@
+# 8.0.1
+* Fix mixin target when reading chunk data to be on return for random scheduled ticks.
+
 # 8.0.0
 - Update to 1.21.8
 
