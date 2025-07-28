@@ -47,7 +47,7 @@ public class SerializableChunkDataMixin {
         }
     }
 
-    @Inject(method = "read", at = @At("HEAD"))
+    @Inject(method = "read", at = @At("RETURN"))
     private void readScheduledRandomTicks(ServerLevel level, PoiManager poiManager, RegionStorageInfo regionStorageInfo, ChunkPos pos, CallbackInfoReturnable<ProtoChunk> cir) {
         if (this.structureData.contains(Constants.MOD_ID)) {
             CompoundTag corgiLibTag = this.structureData.getCompoundOrEmpty(Constants.MOD_ID);
