@@ -10,3 +10,10 @@ Compatible with vanilla clients connecting to a server using this library.
 ## [Curseforge](https://curseforge.com/minecraft/mc-mods/oh-the-trees-youll-grow)
 
 ## [Modrinth](https://modrinth.com/project/oh-the-trees-youll-grow)
+
+### Maven Information
+- Releases: https://maven.jt-dev.tech/releases
+- Snapshots: https://maven.jt-dev.tech/snapshots
+    - Common: dev.corgitaco:Oh-The-Trees-Youll-Grow-common:{version}
+    - Fabric: dev.corgitaco:Oh-The-Trees-Youll-Grow-fabric:{version}
+    - Forge: dev.corgitaco:Oh-The-Trees-Youll-Grow-forge:{version}

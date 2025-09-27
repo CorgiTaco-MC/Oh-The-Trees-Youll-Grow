@@ -1,3 +1,6 @@
+# 1.3.14
+* Make Feature Registration Methods Private
+
 # 1.3.13
 * Fix a crash relating to structure checks in tree growth.
 
