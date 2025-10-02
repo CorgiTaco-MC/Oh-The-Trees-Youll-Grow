@@ -1,5 +1,7 @@
 package dev.corgitaco.ohthetreesyoullgrow;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,4 +15,8 @@ public class Constants {
 	public static ResourceLocation createLocation(String path) {
 		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
+
+    public static <T>ResourceKey<T> key(ResourceKey<? extends Registry<T>> registryKey, String path) {
+        return ResourceKey.create(registryKey, createLocation(path));
+    }
 }
