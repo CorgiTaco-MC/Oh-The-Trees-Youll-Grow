@@ -1,4 +1,5 @@
 # 8.0.2
+- Mark as 1.21.9 compatible.
 
 # 8.0.1
 * Fix mixin target when reading chunk data to be on return for random scheduled ticks.
