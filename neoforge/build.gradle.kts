@@ -84,7 +84,7 @@ publisher {
     displayName.set("${project.properties["mod_name"]}-NeoForge-$minecraftVersion-${project.version}")
     changelog.set(projectDir.toPath().parent.resolve("CHANGELOG.md").toFile().readText())
     artifact.set(tasks.remapJar)
-    setGameVersions(minecraftVersion, "1.21.8", "1.21.7", "1.21.6")
+    setGameVersions(minecraftVersion, "1.21.9", "1.21.8", "1.21.7", "1.21.6")
     setLoaders(ModLoader.NEOFORGE)
     setCurseEnvironment(CurseEnvironment.SERVER)
     setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22)
