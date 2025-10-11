@@ -118,11 +118,12 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         Map<BlockPos, BlockState> leavePositions = new HashMap<>();
         Map<BlockPos, BlockState> logPositions = new HashMap<>();
+        Map<BlockPos, BlockState> additionalPositions = new HashMap<>();
 
-        fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, maxTrunkBuildingDepth, direction);
+        fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, additionalPositions, maxTrunkBuildingDepth, direction);
 
         // Verify the canopy has connected with all trunk positions
-        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, trunkLength, direction)) {
+        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, additionalPositions, logPositions, trunkLength, direction)) {
             return false;
         }
 
@@ -138,10 +139,6 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         placeKnownLogPositions(logPositions, level);
         placeKnownLeavePositions(leavePositions, level);
-
-        placeAdditional(config, level, origin, placeSettings, trunkBasePalette, centerOffset);
-        placeAdditional(config, level, origin, placeSettings, randomCanopyPalette, centerOffset);
-
 
         Set<BlockPos> decorationPositions = new HashSet<>();
         placeTreeDecorations(config.treeDecorators(), level, random, leavePositions.keySet(), logPositions.keySet(), decorationPositions);
@@ -199,14 +196,14 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
         }
     }
 
-    private static boolean fillCanopyPositions(List<StructureTemplate.StructureBlockInfo> canopyAnchor, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> logPositions, int trunkLength, Direction treeGrowthDirection) {
+    private static boolean fillCanopyPositions(List<StructureTemplate.StructureBlockInfo> canopyAnchor, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> additionalPositions, int trunkLength, Direction treeGrowthDirection) {
         if (!canopyAnchor.isEmpty()) {
             if (canopyAnchor.size() > 1) {
                 throw new IllegalArgumentException("There cannot be more than one central canopy position. Canopy central position is specified with yellow wool on the trunk palette.");
             }
-            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, getModifiedPos(placeSettings, canopyAnchor.get(0), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength, treeGrowthDirection);
+            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, getModifiedPos(placeSettings, canopyAnchor.get(0), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, logPositions, additionalPositions, trunkLength, treeGrowthDirection);
         } else {
-            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, origin, placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength, treeGrowthDirection);
+            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, origin, placeSettings, randomCanopyPalette, leavePositions, logPositions, additionalPositions, trunkLength, treeGrowthDirection);
         }
     }
 
@@ -298,22 +295,20 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
         leavesPostApply.forEach(Runnable::run);
     }
 
-    public static void placeAdditional(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette palette, BlockPos centerOffset) {
-        List<StructureTemplate.StructureBlockInfo> additionalBlocks = getStructureInfosInStructurePalletteFromBlockList(config.placeFromNBT(), palette);
-        for (StructureTemplate.StructureBlockInfo additionalBlock : additionalBlocks) {
+    public static void fillTrunkPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette trunkBasePalette, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, List<StructureTemplate.StructureBlockInfo> logBuilders, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, Map<BlockPos, BlockState> additionalBlocks, int maxTrunkBuildingDepth, Direction treeGrowthDirection) {
+        fillLogsUnder(logProvider, level, randomSource, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn(), trunkPositions, treeGrowthDirection);
+        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, centerOffset, logs, trunkPositions, treeGrowthDirection);
+        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), trunkBasePalette), leavePositions, centerOffset, config.leavesPlacementFilter(), treeGrowthDirection);
+        List<StructureTemplate.StructureBlockInfo> additionalBlocksInfo = getStructureInfosInStructurePalletteFromBlockList(config.placeFromNBT(), trunkBasePalette);
+        for (StructureTemplate.StructureBlockInfo additionalBlock : additionalBlocksInfo) {
             BlockPos pos = getModifiedPos(placeSettings, additionalBlock, centerOffset, origin);
-            level.setBlock(pos, additionalBlock.state(), 2);
+            pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
+            additionalBlocks.put(pos.immutable(), additionalBlock.state());
             ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
         }
     }
 
-    public static void fillTrunkPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette trunkBasePalette, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, List<StructureTemplate.StructureBlockInfo> logBuilders, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int maxTrunkBuildingDepth, Direction treeGrowthDirection) {
-        fillLogsUnder(logProvider, level, randomSource, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn(), trunkPositions, treeGrowthDirection);
-        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, centerOffset, logs, trunkPositions, treeGrowthDirection);
-        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), trunkBasePalette), leavePositions, centerOffset, config.leavesPlacementFilter(), treeGrowthDirection);
-    }
-
-    public static boolean fillCanopyPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int trunkLength, Direction treeGrowthDirection) {
+    public static boolean fillCanopyPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, Map<BlockPos, BlockState> additionalBlocks, int trunkLength, Direction treeGrowthDirection) {
         List<StructureTemplate.StructureBlockInfo> leaves = getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), randomCanopyPalette);
         List<StructureTemplate.StructureBlockInfo> canopyLogs = getStructureInfosInStructurePalletteFromBlockList(config.logTarget(), randomCanopyPalette);
         List<StructureTemplate.StructureBlockInfo> canopyAnchor = randomCanopyPalette.blocks(Blocks.WHITE_WOOL);
@@ -337,6 +332,13 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
 
         placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, canopyLogs, trunkPositions, treeGrowthDirection);
         placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, leaves, leavePositions, canopyCenterOffset, config.leavesPlacementFilter(), treeGrowthDirection);
+        List<StructureTemplate.StructureBlockInfo> additionalBlocksInfo = getStructureInfosInStructurePalletteFromBlockList(config.placeFromNBT(), randomCanopyPalette);
+        for (StructureTemplate.StructureBlockInfo additionalBlock : additionalBlocksInfo) {
+            BlockPos pos = getModifiedPos(placeSettings, additionalBlock, canopyCenterOffset, origin);
+            pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
+            additionalBlocks.put(pos.immutable(), additionalBlock.state());
+            ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+        }
         return true;
     }
 
