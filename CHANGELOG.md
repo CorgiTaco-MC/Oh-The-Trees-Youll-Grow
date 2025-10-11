@@ -1,3 +1,6 @@
+# 1.4.2
+* Fix trunk positions.
+
 # 1.4.1
 * Fix canopy and trunk additional block placements.
 
