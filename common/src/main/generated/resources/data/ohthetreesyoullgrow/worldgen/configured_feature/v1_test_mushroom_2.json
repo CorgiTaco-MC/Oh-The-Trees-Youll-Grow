@@ -4,7 +4,7 @@
     "base_location": "ohthetreesyoullgrow:features/mushrooms/testv1/test_mushroom_trunk1",
     "can_grow_on_filter": {
       "type": "minecraft:matching_block_tag",
-      "tag": "minecraft:dirt"
+      "tag": "minecraft:mushroom_grow_block"
     },
     "can_leaves_place_filter": {
       "type": "minecraft:replaceable"

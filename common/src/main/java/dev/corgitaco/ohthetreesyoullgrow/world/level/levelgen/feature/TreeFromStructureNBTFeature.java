@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -71,7 +74,16 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         BlockPos origin = featurePlaceContext.origin();
         if (DEBUG) {
             level.setBlock(origin, Blocks.DIAMOND_BLOCK.defaultBlockState(), 2);
+            BlockPos blockPos = origin.above(10);
+            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.WEST), Blocks.REDSTONE_BLOCK.defaultBlockState(), 2);
+            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.EAST), Blocks.EMERALD_BLOCK.defaultBlockState(), 2);
+            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.NORTH), Blocks.DIAMOND_BLOCK.defaultBlockState(), 2);
+            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.SOUTH), Blocks.COPPER_BLOCK.defaultBlockState(), 2);
         }
+
+
+
+
         RandomSource random = featurePlaceContext.random();
         StructurePlaceSettings placeSettings = new StructurePlaceSettings().setRotation(Rotation.getRandom(random));
         StructureTemplate.Palette trunkBasePalette = placeSettings.getRandomPalette(basePalettes, origin);
@@ -99,20 +111,18 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         int trunkLength = config.height().sample(random);
         final int maxTrunkBuildingDepth = config.maxLogDepth();
 
-        for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
-            BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
-            if (!isOnGround(config.maxLogDepth(), level, pos, config.growableOn())) {
-                return false; // Exit because all positions are not on ground.
-            }
+        Direction direction = findDirectionOfGrowthFromOrientation(config.orientation(), config, logBuilders, placeSettings, centerOffset, level, origin, random);
+        if (direction == null) {
+            return false;
         }
 
         Map<BlockPos, BlockState> leavePositions = new HashMap<>();
         Map<BlockPos, BlockState> logPositions = new HashMap<>();
 
-        fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, maxTrunkBuildingDepth);
+        fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, maxTrunkBuildingDepth, direction);
 
         // Verify the canopy has connected with all trunk positions
-        if(!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, trunkLength)) {
+        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, trunkLength, direction)) {
             return false;
         }
 
@@ -141,14 +151,62 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
 
 
-    private static boolean fillCanopyPositions(List<StructureTemplate.StructureBlockInfo> canopyAnchor, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> logPositions, int trunkLength) {
+private static boolean doAllPositionsTouchGround(List<StructureTemplate.StructureBlockInfo> logBuilders, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, TreeFromStructureNBTConfig config, WorldGenLevel level, Direction direction) {
+        for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
+            BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
+            pos = rotateInDirectionAroundOrigin(pos, origin, direction);
+            if (!isOnGround(config.maxLogDepth(), level, pos, config.growableOn(), direction)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Nullable
+    private static Direction findDirectionOfGrowthFromOrientation(TreeFromStructureNBTConfig.Orientation orientation, TreeFromStructureNBTConfig config, List<StructureTemplate.StructureBlockInfo> logBuilders, StructurePlaceSettings placeSettings, BlockPos centerOffset, WorldGenLevel level, BlockPos origin, RandomSource random) {
+        switch (orientation) {
+            case STANDARD: {
+                if (doAllPositionsTouchGround(logBuilders, placeSettings, centerOffset, origin, config, level, Direction.UP)) {
+                    return Direction.UP;
+                } else {
+                    return null; // Unknown
+                }
+            }
+            case UPSIDE_DOWN: {
+                if (doAllPositionsTouchGround(logBuilders, placeSettings, centerOffset, origin, config, level, Direction.DOWN)) {
+                    return Direction.DOWN;
+                } else {
+                    return null; // Unknown
+                }
+            }
+            case SIDEWAYS: {
+                List<Direction> horizontalDirections = Direction.Plane.HORIZONTAL.shuffledCopy(random);
+                List<Direction> validDirections = new ArrayList<>(horizontalDirections.size());
+
+                for (Direction direction : horizontalDirections) {
+                    if (doAllPositionsTouchGround(logBuilders, placeSettings, centerOffset, origin, config, level, direction)) {
+                        validDirections.add(direction);
+                    }
+                }
+                if (!validDirections.isEmpty()) {
+                    return validDirections.get(0);
+                }
+
+                return null; // Unknown
+            }
+            default:
+                throw new IllegalArgumentException("Unreachable statement, orientation %s is not supported.".formatted(orientation));
+        }
+    }
+
+    private static boolean fillCanopyPositions(List<StructureTemplate.StructureBlockInfo> canopyAnchor, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> logPositions, int trunkLength, Direction treeGrowthDirection) {
         if (!canopyAnchor.isEmpty()) {
             if (canopyAnchor.size() > 1) {
                 throw new IllegalArgumentException("There cannot be more than one central canopy position. Canopy central position is specified with yellow wool on the trunk palette.");
             }
-            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, getModifiedPos(placeSettings, canopyAnchor.get(0), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength);
+            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, getModifiedPos(placeSettings, canopyAnchor.get(0), centerOffset, origin), placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength, treeGrowthDirection);
         } else {
-           return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, origin, placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength);
+            return fillCanopyPositions(config.logProvider(), config.leavesProvider(), config, level, randomSource, origin, placeSettings, randomCanopyPalette, leavePositions, logPositions, trunkLength, treeGrowthDirection);
         }
     }
 
@@ -249,13 +307,13 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
-    public static void fillTrunkPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette trunkBasePalette, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, List<StructureTemplate.StructureBlockInfo> logBuilders, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int maxTrunkBuildingDepth) {
-        fillLogsUnder(logProvider, level, randomSource, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn(), trunkPositions);
-        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, centerOffset, logs, trunkPositions);
-        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), trunkBasePalette), leavePositions, centerOffset, config.leavesPlacementFilter());
+    public static void fillTrunkPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette trunkBasePalette, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, List<StructureTemplate.StructureBlockInfo> logBuilders, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int maxTrunkBuildingDepth, Direction treeGrowthDirection) {
+        fillLogsUnder(logProvider, level, randomSource, origin, placeSettings, centerOffset, logBuilders, maxTrunkBuildingDepth, config.growableOn(), trunkPositions, treeGrowthDirection);
+        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, centerOffset, logs, trunkPositions, treeGrowthDirection);
+        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), trunkBasePalette), leavePositions, centerOffset, config.leavesPlacementFilter(), treeGrowthDirection);
     }
 
-    public static boolean fillCanopyPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int trunkLength) {
+    public static boolean fillCanopyPositions(BlockStateProvider logProvider, BlockStateProvider leavesProvider, TreeFromStructureNBTConfig config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, int trunkLength, Direction treeGrowthDirection) {
         List<StructureTemplate.StructureBlockInfo> leaves = getStructureInfosInStructurePalletteFromBlockList(config.leavesTarget(), randomCanopyPalette);
         List<StructureTemplate.StructureBlockInfo> canopyLogs = getStructureInfosInStructurePalletteFromBlockList(config.logTarget(), randomCanopyPalette);
         List<StructureTemplate.StructureBlockInfo> canopyAnchor = randomCanopyPalette.blocks(Blocks.WHITE_WOOL);
@@ -273,19 +331,20 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         List<StructureTemplate.StructureBlockInfo> trunkFillers = new ArrayList<>(randomCanopyPalette.blocks(Blocks.RED_WOOL));
 
-        if(!intersectTrunk(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, trunkFillers, trunkLength + 1, trunkPositions)) {
+        if (!intersectTrunk(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, trunkFillers, trunkLength + 1, trunkPositions, treeGrowthDirection)) {
             return false;
         }
 
-        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, canopyLogs, trunkPositions);
-        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, leaves, leavePositions, canopyCenterOffset, config.leavesPlacementFilter());
+        placeLogsWithRotation(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, canopyLogs, trunkPositions, treeGrowthDirection);
+        placeLeavesWithCalculatedDistanceAndRotation(leavesProvider, level, origin, randomSource, placeSettings, leaves, leavePositions, canopyCenterOffset, config.leavesPlacementFilter(), treeGrowthDirection);
         return true;
     }
 
-    public static void placeLogsWithRotation(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, Map<BlockPos, BlockState> trunkPositions) {
+    public static void placeLogsWithRotation(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logs, Map<BlockPos, BlockState> trunkPositions, Direction treeGrowthDirection) {
         for (StructureTemplate.StructureBlockInfo trunk : logs) {
             BlockPos pos = getModifiedPos(placeSettings, trunk, centerOffset, origin);
-            trunkPositions.put(pos.immutable(), getTransformedState(pos, logProvider.getState(random, pos), trunk.state(), placeSettings.getRotation(), level));
+            pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
+            trunkPositions.put(pos.immutable(), getTransformedState(pos, logProvider.getState(random, pos), trunk.state(), placeSettings.getRotation(), level, treeGrowthDirection));
         }
     }
 
@@ -298,25 +357,27 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
-    public static void placeLeavesWithCalculatedDistanceAndRotation(BlockStateProvider leavesProvider, WorldGenLevel level, BlockPos origin, RandomSource random, StructurePlaceSettings placeSettings, List<StructureTemplate.StructureBlockInfo> leaves, Map<BlockPos, BlockState> leavePositions, BlockPos canopyCenterOffset, BlockPredicate leavesPlacementFilter) {
+    public static void placeLeavesWithCalculatedDistanceAndRotation(BlockStateProvider leavesProvider, WorldGenLevel level, BlockPos origin, RandomSource random, StructurePlaceSettings placeSettings, List<StructureTemplate.StructureBlockInfo> leaves, Map<BlockPos, BlockState> leavePositions, BlockPos canopyCenterOffset, BlockPredicate leavesPlacementFilter, Direction treeGrowthDirection) {
         for (StructureTemplate.StructureBlockInfo leaf : leaves) {
             BlockPos modifiedPos = getModifiedPos(placeSettings, leaf, canopyCenterOffset, origin);
+            modifiedPos = rotateInDirectionAroundOrigin(modifiedPos, origin, treeGrowthDirection);
 
             if (leavesPlacementFilter.test(level, modifiedPos)) {
-                leavePositions.put(modifiedPos.immutable(), getTransformedState(modifiedPos, leavesProvider.getState(random, modifiedPos), leaf.state(), placeSettings.getRotation(), level));
+                leavePositions.put(modifiedPos.immutable(), getTransformedState(modifiedPos, leavesProvider.getState(random, modifiedPos), leaf.state(), placeSettings.getRotation(), level, treeGrowthDirection));
             }
         }
     }
 
-    public static void fillLogsUnder(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, BlockPredicate groundFilter, Map<BlockPos, BlockState> trunkPositions) {
+    public static void fillLogsUnder(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, BlockPredicate groundFilter, Map<BlockPos, BlockState> trunkPositions, Direction treeGrowthDirection) {
         for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
             BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
+            pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos().set(pos);
 
             for (int i = 0; i < maxTrunkBuildingDepth; i++) {
                 if (!groundFilter.test(level, mutableBlockPos) && !level.getBlockState(mutableBlockPos).is(Blocks.BEDROCK)) {
-                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level));
-                    mutableBlockPos.move(Direction.DOWN);
+                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+                    mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
                     ((RandomTickScheduler) level.getChunk(mutableBlockPos)).scheduleRandomTick(mutableBlockPos.immutable());
                     break;
@@ -325,15 +386,16 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
     }
 
-    public static boolean intersectTrunk(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, Map<BlockPos, BlockState> trunkPositions) {
+    public static boolean intersectTrunk(BlockStateProvider logProvider, WorldGenLevel level, RandomSource random, BlockPos origin, StructurePlaceSettings placeSettings, BlockPos centerOffset, List<StructureTemplate.StructureBlockInfo> logBuilders, int maxTrunkBuildingDepth, Map<BlockPos, BlockState> trunkPositions, Direction treeGrowthDirection) {
         for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
             BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
+            pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos().set(pos);
 
             for (int i = 0; i <= maxTrunkBuildingDepth; i++) {
                 if (!trunkPositions.containsKey(mutableBlockPos)) {
-                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level));
-                    mutableBlockPos.move(Direction.DOWN);
+                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+                    mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
                     break;
                 }
@@ -349,32 +411,17 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
 
     @NotNull
-    public static BlockState getTransformedState(BlockPos modifiedPos, BlockState state, BlockState nbtState, Rotation rotation, WorldGenLevel level) {
-        for (Property property : state.getProperties()) {
-            if (nbtState.hasProperty(property)) {
-                Comparable value = nbtState.getValue(property);
-                state = state.setValue(property, value);
-            }
+    public static BlockState getTransformedState(BlockPos modifiedPos, BlockState state, BlockState nbtState, Rotation rotation, WorldGenLevel level, Direction directionOfGrowth) {
+        for (BlockStateModifier modifier : BLOCK_STATE_MODIFIERS) {
+            state = modifier.apply(modifiedPos, state, nbtState, rotation, level, directionOfGrowth);
         }
-
-        if (state.hasProperty(LeavesBlock.WATERLOGGED)) {
-            FluidState fluidState = level.getFluidState(modifiedPos);
-            if (fluidState.is(Fluids.WATER) && fluidState.getAmount() >= 7) {
-                state = state.setValue(LeavesBlock.WATERLOGGED, true);
-            } else {
-                state = state.setValue(LeavesBlock.WATERLOGGED, false);
-            }
-        }
-
-        state = state.rotate(rotation);
-
         return state;
     }
 
-    public static boolean isOnGround(int maxLogDepth, WorldGenLevel level, BlockPos pos, BlockPredicate growableOn) {
+    public static boolean isOnGround(int maxLogDepth, WorldGenLevel level, BlockPos pos, BlockPredicate growableOn, Direction treeGrowthDirection) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos().set(pos);
         for (int logDepth = 0; logDepth < maxLogDepth; logDepth++) {
-            mutableBlockPos.move(Direction.DOWN);
+            mutableBlockPos.move(treeGrowthDirection.getOpposite());
             if (growableOn.test(level, mutableBlockPos)) {
                 return true;
             }
@@ -387,6 +434,23 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         return StructureTemplate.calculateRelativePosition(settings, placing.pos()).offset(featureOrigin).offset(StructureTemplate.calculateRelativePosition(settings, partCenter));
     }
 
+
+    public static BlockPos rotateInDirectionAroundOrigin(BlockPos pos, BlockPos origin, Direction direction) {
+        BlockPos offset = pos.subtract(origin);
+        return switch (direction) {
+            case UP -> pos;
+            case DOWN -> new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getY(), origin.getZ() + offset.getZ());
+            case EAST ->
+                    new BlockPos(origin.getX() + offset.getY(), origin.getY() - offset.getX(), origin.getZ() + offset.getZ());
+            case WEST ->
+                    new BlockPos(origin.getX() - offset.getY(), origin.getY() + offset.getX(), origin.getZ() + offset.getZ());
+            case NORTH ->
+                    new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getZ(), origin.getZ() - offset.getY());
+            case SOUTH ->
+                    new BlockPos(origin.getX() + offset.getX(), origin.getY() + offset.getZ(), origin.getZ() + offset.getY());
+        };
+    }
+
     public static IllegalArgumentException noTreePartPresent(ResourceLocation location) {
         return new IllegalArgumentException(String.format("\"%s\" is not a valid tree part.", location));
     }
@@ -397,5 +461,61 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             result.addAll(palette.blocks(block));
         }
         return result;
+    }
+
+    public static final List<BlockStateModifier> BLOCK_STATE_MODIFIERS = Util.make(new ArrayList<>(), list -> {
+        list.add((modifiedPos, state, nbtState, rotation, level, directionOfGrowth) -> {
+            for (Property property : state.getProperties()) {
+                if (nbtState.hasProperty(property)) {
+                    Comparable value = nbtState.getValue(property);
+                    state = state.setValue(property, value);
+                }
+            }
+
+            return state;
+        });
+        list.add( (modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
+            if (lastState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+                FluidState fluidState = level.getFluidState(modifiedPos);
+                if (fluidState.is(Fluids.WATER) && fluidState.getAmount() >= 7) {
+                    lastState = lastState.setValue(BlockStateProperties.WATERLOGGED, true);
+                } else {
+                    lastState = lastState.setValue(BlockStateProperties.WATERLOGGED, false);
+                }
+            }
+            return lastState;
+        });
+        list.add((modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> lastState.rotate(rotation));
+        list.add((modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
+            if (lastState.hasProperty(BlockStateProperties.AXIS)) {
+                Direction.Axis axis = lastState.getValue(BlockStateProperties.AXIS);
+                Direction.Axis directionOfGrowthAxis = directionOfGrowth.getAxis();
+                switch (directionOfGrowthAxis) {
+                    case Y -> {
+                        // No change needed
+                    }
+                    case X -> {
+                        if (axis == Direction.Axis.Y) {
+                            lastState = lastState.setValue(BlockStateProperties.AXIS, Direction.Axis.X);
+                        } else if (axis == Direction.Axis.X) {
+                            lastState = lastState.setValue(BlockStateProperties.AXIS, Direction.Axis.Y);
+                        }
+                    }
+                    case Z -> {
+                        if (axis == Direction.Axis.Y) {
+                            lastState = lastState.setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
+                        } else if (axis == Direction.Axis.Z) {
+                            lastState = lastState.setValue(BlockStateProperties.AXIS, Direction.Axis.Y);
+                        }
+                    }
+                }
+            }
+            return lastState;
+        });
+    });
+
+    @FunctionalInterface
+    public interface BlockStateModifier {
+        BlockState apply(BlockPos modifiedPos, BlockState lastState, BlockState nbtState, Rotation rotation, WorldGenLevel level, Direction directionOfGrowth);
     }
 }
