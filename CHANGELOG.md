@@ -1,3 +1,6 @@
+# 1.4.0
+* Add sideways and upside down tree config choices.
+
 # 1.3.14
 * Make Feature Registration Methods Private
 
