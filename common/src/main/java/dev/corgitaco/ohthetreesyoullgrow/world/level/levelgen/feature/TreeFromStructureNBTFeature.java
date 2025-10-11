@@ -123,7 +123,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, additionalPositions, maxTrunkBuildingDepth, direction);
 
         // Verify the canopy has connected with all trunk positions
-        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, additionalPositions, logPositions, trunkLength, direction)) {
+        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, additionalPositions, trunkLength, direction)) {
             return false;
         }
 
