@@ -1,3 +1,6 @@
+# 5.1.0
+* Add sideways and upside down tree config choices.
+
 # 5.0.14
 * Concurrency safety for random scheduled ticks.
 
