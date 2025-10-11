@@ -1,3 +1,6 @@
+# 5.1.1
+* Fix canopy and trunk additional block placements.
+
 # 5.1.0
 * Add sideways and upside down tree config choices.
 
