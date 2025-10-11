@@ -1,3 +1,6 @@
+# 5.1.2
+* Fix trunk positions.
+
 # 5.1.1
 * Fix canopy and trunk additional block placements.
 
