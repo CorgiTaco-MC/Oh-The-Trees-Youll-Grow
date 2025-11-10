@@ -184,7 +184,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                     }
                 }
                 if (!validDirections.isEmpty()) {
-                    return validDirections.get(0);
+                    return validDirections.getFirst();
                 }
 
                 return null; // Unknown
