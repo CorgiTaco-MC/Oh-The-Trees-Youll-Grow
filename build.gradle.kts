@@ -2,8 +2,8 @@ import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
     id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.11-SNAPSHOT" apply false
-    id("com.gradleup.shadow") version "9.2.1" apply false
+    id("dev.architectury.loom") version "1.13-SNAPSHOT" apply false
+    id("com.gradleup.shadow") version "9.3.0" apply false
     java
     idea
     `maven-publish`
@@ -26,7 +26,6 @@ subprojects {
 
     val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
     loom.silentMojangMappingsLicense()
-    loom.mixin.useLegacyMixinAp.set(false)
 
     repositories {
         mavenCentral()

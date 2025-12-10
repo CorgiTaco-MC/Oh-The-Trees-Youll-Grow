@@ -1,3 +1,6 @@
+# 1.4.3
+* Allow BlockStateProperties.FACING to be used on AttachedToLogsDecorator and still set Direction correctly.
+
 # 1.4.2
 * Fix trunk positions.
 
