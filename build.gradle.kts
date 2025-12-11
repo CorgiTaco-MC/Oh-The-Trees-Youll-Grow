@@ -26,7 +26,6 @@ subprojects {
 
     val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
     loom.silentMojangMappingsLicense()
-    loom.mixin.useLegacyMixinAp.set(false)
 
     repositories {
         mavenCentral()
@@ -43,7 +42,7 @@ subprojects {
         "minecraft"("com.mojang:minecraft:$minecraftVersion")
         "mappings"(loom.layered{
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$minecraftVersion:${project.properties["parchment"]}@zip")
+            parchment("org.parchmentmc.data:parchment-1.21.10:${project.properties["parchment"]}@zip")
         })
 
         compileOnly("org.jetbrains:annotations:26.0.2")

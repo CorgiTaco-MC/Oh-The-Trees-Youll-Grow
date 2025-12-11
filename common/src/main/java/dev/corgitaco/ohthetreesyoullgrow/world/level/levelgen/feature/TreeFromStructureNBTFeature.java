@@ -6,7 +6,7 @@ import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurat
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -53,9 +53,9 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         WorldGenLevel level = featurePlaceContext.level();
         StructureTemplateManager templateManager = level.getLevel().getStructureManager();
-        ResourceLocation baseLocation = config.baseLocation();
+        Identifier baseLocation = config.baseLocation();
         Optional<StructureTemplate> baseTemplateOptional = templateManager.get(baseLocation);
-        ResourceLocation canopyLocation = config.canopyLocation();
+        Identifier canopyLocation = config.canopyLocation();
         Optional<StructureTemplate> canopyTemplateOptional = templateManager.get(canopyLocation);
 
         if (baseTemplateOptional.isEmpty()) {
@@ -385,7 +385,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         return StructureTemplate.calculateRelativePosition(settings, placing.pos()).offset(featureOrigin).offset(StructureTemplate.calculateRelativePosition(settings, partCenter));
     }
 
-    public static IllegalArgumentException noTreePartPresent(ResourceLocation location) {
+    public static IllegalArgumentException noTreePartPresent(Identifier location) {
         return new IllegalArgumentException(String.format("\"%s\" is not a valid tree part.", location));
     }
 

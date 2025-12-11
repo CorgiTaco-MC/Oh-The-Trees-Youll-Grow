@@ -1,3 +1,6 @@
+# 9.0.0
+- Update to 1.21.11
+
 # 8.0.3
 * Allow BlockStateProperties.FACING to be used on AttachedToLogsDecorator and still set Direction correctly.
 

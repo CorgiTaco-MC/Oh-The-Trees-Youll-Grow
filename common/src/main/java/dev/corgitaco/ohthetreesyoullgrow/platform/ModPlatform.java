@@ -1,7 +1,7 @@
 package dev.corgitaco.ohthetreesyoullgrow.platform;
 
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.util.Util;
 
 import java.nio.file.Path;
 import java.util.ServiceLoader;
