@@ -36,6 +36,6 @@ public class ForgeModPlatform implements ModPlatform {
 
     @Override
     public <T> Supplier<T> register(Registry<? super T> registry, String name, Supplier<T> value) {
-        return CACHED.computeIfAbsent(registry.key(), key -> DeferredRegister.create(registry.key().location(), Constants.MOD_ID)).register(name, value);
+        return CACHED.computeIfAbsent(registry.key(), key -> DeferredRegister.create(registry.key(), Constants.MOD_ID)).register(name, value);
     }
 }

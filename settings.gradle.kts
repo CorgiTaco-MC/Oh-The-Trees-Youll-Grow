@@ -16,6 +16,6 @@ develocity.buildScan {
     termsOfUseAgree = "yes"
 }
 
-include("common", "fabric", /*"forge",*/ "neoforge")
+include("common", "fabric", "forge", "neoforge")
 
 rootProject.name = "Oh The Trees You'll Grow"
