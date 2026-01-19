@@ -1,3 +1,9 @@
+# 5.2.0
+* Add the ability to use blocks within the NBT to place Blockstates via Blockstate providers.
+* Allow the ability to specify multiple leave targets and multiple leave block state providers.
+* Introduce Tree From Structure NBT v2
+* Fix placing additional blocks from NBT in the v1 feature
+
 # 5.1.3
 * Allow BlockStateProperties.FACING to be used on AttachedToLogsDecorator and still set Direction correctly.
 
