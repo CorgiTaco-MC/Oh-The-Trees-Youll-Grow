@@ -3,19 +3,23 @@ package dev.corgitaco.ohthetreesyoullgrow.data.worldgen.features;
 import dev.corgitaco.ohthetreesyoullgrow.Constants;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.TYGFeatures;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfigV2;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator;
@@ -194,6 +198,23 @@ public class TYGConfiguredFeatures {
                     .maxLogDepth(3)
                     .build()
     );
+
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE1 = createConfiguredFeature("v2_test_tree_1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
+                    .baseLocation(Constants.createLocation("features/trees/testv2/test_tree_trunk1"))
+                    .canopyLocation(Constants.createLocation("features/trees/testv2/test_tree_canopy1"))
+                    .height(UniformInt.of(5, 10))
+                    .logProvider(BlockStateProvider.simple(Blocks.ACACIA_LOG))
+                    .leavesProvider(List.of(BlockStateProvider.simple(Blocks.OAK_LEAVES), BlockStateProvider.simple(Blocks.OAK_LEAVES)))
+                    .logTarget(Set.of(Blocks.OAK_LOG))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES))
+                    .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
+                    .maxLogDepth(3)
+                    .replaceFromNBT(Map.of(Blocks.SHROOMLIGHT, new WeightedStateProvider(SimpleWeightedRandomList.<BlockState>builder().add(Blocks.GLOWSTONE.defaultBlockState(), 3).add(Blocks.GLASS.defaultBlockState(), 1).build())))
+                    .treeDecorators(List.of(new AlterGroundDecorator(SimpleStateProvider.simple(Blocks.MOSS_BLOCK))))
+                    .build()
+    );
+
 
     private static <FC extends FeatureConfiguration, F extends Feature<FC>> ResourceKey<ConfiguredFeature<?, ?>> createConfiguredFeature(String id, Supplier<? extends F> feature, Function<BootstapContext<ConfiguredFeature<?, ?>>, ? extends FC> config) {
         ResourceKey<ConfiguredFeature<?, ?>> configuredFeatureResourceKey = Constants.key(Registries.CONFIGURED_FEATURE, id);
