@@ -82,8 +82,6 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
 
 
-
-
         RandomSource random = featurePlaceContext.random();
         StructurePlaceSettings placeSettings = new StructurePlaceSettings().setRotation(Rotation.getRandom(random));
         StructureTemplate.Palette trunkBasePalette = placeSettings.getRandomPalette(basePalettes, origin);
@@ -127,11 +125,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             return false;
         }
 
-        if (config.isSapling()) {
-            if (validateLogPositions(logPositions, config, level)) {
-                return false; // Exit because some positions are not valid.
-            }
+        if (validateLogPositions(logPositions, config, level)) {
+            return false; // Exit because some log positions are not valid.
         }
+
 
         if (insideStructure(logPositions, level, config)) {
             return false; // Exit because the trunk position intersects with a structure.
@@ -247,7 +244,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfig config, WorldGenLevel level) {
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!testValidPos(config, level, trunkPosition)) {
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
                 return true;
             }
         }
@@ -440,7 +437,8 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         BlockPos offset = pos.subtract(origin);
         return switch (direction) {
             case UP -> pos;
-            case DOWN -> new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getY(), origin.getZ() + offset.getZ());
+            case DOWN ->
+                    new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getY(), origin.getZ() + offset.getZ());
             case EAST ->
                     new BlockPos(origin.getX() + offset.getY(), origin.getY() - offset.getX(), origin.getZ() + offset.getZ());
             case WEST ->
@@ -475,7 +473,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
             return state;
         });
-        list.add( (modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
+        list.add((modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
             if (lastState.hasProperty(BlockStateProperties.WATERLOGGED)) {
                 FluidState fluidState = level.getFluidState(modifiedPos);
                 if (fluidState.is(Fluids.WATER) && fluidState.getAmount() >= 7) {

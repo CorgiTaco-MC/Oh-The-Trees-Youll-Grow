@@ -20,9 +20,10 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                                            BlockStateProvider logProvider, List<BlockStateProvider> leavesProvider,
                                            Set<Block> logTarget, List<Block> leavesTarget,
                                            BlockPredicate growableOn, BlockPredicate leavesPlacementFilter,
+                                           BlockPredicate logsPlacementFilter,
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
-                                           Map<Block, BlockStateProvider> replaceFromNBT, boolean isSapling,
+                                           Map<Block, BlockStateProvider> replaceFromNBT,
                                            Orientation orientation) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
@@ -38,10 +39,10 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     BuiltInRegistries.BLOCK.byNameCodec().listOf().fieldOf("leaves_target").forGetter(TreeFromStructureNBTConfigV2::leavesTarget),
                     BlockPredicate.CODEC.fieldOf("can_grow_on_filter").forGetter(TreeFromStructureNBTConfigV2::growableOn),
                     BlockPredicate.CODEC.fieldOf("can_leaves_place_filter").forGetter(TreeFromStructureNBTConfigV2::leavesPlacementFilter),
+                    BlockPredicate.CODEC.optionalFieldOf("can_logs_place_filter", BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfigV2::logsPlacementFilter),
                     Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfigV2::maxLogDepth),
                     TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
                     Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), BlockStateProvider.CODEC).fieldOf("replace_from_nbt").forGetter(TreeFromStructureNBTConfigV2::replaceFromNBT),
-                    Codec.BOOL.optionalFieldOf("sapling", false).forGetter(TreeFromStructureNBTConfigV2::isSapling),
                     Orientation.CODEC.optionalFieldOf("orientation", Orientation.STANDARD).forGetter(TreeFromStructureNBTConfigV2::orientation)
             ).apply(builder, TreeFromStructureNBTConfigV2::new)
     );
@@ -71,10 +72,10 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         private List<Block> leavesTarget;
         private BlockPredicate growableOn = BlockPredicate.replaceable();
         private BlockPredicate leavesPlacementFilter = BlockPredicate.replaceable();
+        private BlockPredicate logsPlacementFilter = BlockPredicate.replaceable();
         private int maxLogDepth = 5;
         private List<TreeDecorator> treeDecorators = new ArrayList<>();
         private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
-        private boolean isSapling = false;
         private Orientation orientation = Orientation.STANDARD;
 
         public Builder baseLocation(ResourceLocation baseLocation) {
@@ -122,6 +123,11 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
             return this;
         }
 
+        public Builder logsPlacementFilter(BlockPredicate logsPlacementFilter) {
+            this.logsPlacementFilter = logsPlacementFilter;
+            return this;
+        }
+
         public Builder maxLogDepth(int maxLogDepth) {
             this.maxLogDepth = maxLogDepth;
             return this;
@@ -134,11 +140,6 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
 
         public Builder replaceFromNBT(Map<Block, BlockStateProvider> placeFromNBT) {
             this.replaceFromNBT = placeFromNBT;
-            return this;
-        }
-
-        public Builder isSapling(boolean isSapling) {
-            this.isSapling = isSapling;
             return this;
         }
 
@@ -180,10 +181,10 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     leavesTarget,
                     growableOn,
                     leavesPlacementFilter,
+                    logsPlacementFilter,
                     maxLogDepth,
                     treeDecorators,
                     replaceFromNBT,
-                    isSapling,
                     orientation
             );
         }

@@ -125,11 +125,10 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             return false;
         }
 
-        if (config.isSapling()) {
-            if (validateLogPositions(logPositions, config, level)) {
-                return false; // Exit because some positions are not valid.
-            }
+        if (validateLogPositions(logPositions, config, level)) {
+            return false; // Exit because some positions are not valid.
         }
+
 
         if (insideStructure(logPositions, level, config)) {
             return false; // Exit because the trunk position intersects with a structure.
@@ -246,7 +245,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
 
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfigV2 config, WorldGenLevel level) {
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!testValidPos(config, level, trunkPosition)) {
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
                 return true;
             }
         }
