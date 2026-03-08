@@ -1,3 +1,6 @@
+# 5.2.1
+* Fix issue with piercing walls and structures and bedrock
+
 # 5.2.0
 * Add the ability to use blocks within the NBT to place Blockstates via Blockstate providers.
 * Allow the ability to specify multiple leave targets and multiple leave block state providers.
