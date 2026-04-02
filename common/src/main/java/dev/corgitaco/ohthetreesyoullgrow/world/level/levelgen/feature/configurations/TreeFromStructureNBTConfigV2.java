@@ -23,6 +23,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
                                            Map<Block, BlockStateProvider> replaceFromNBT, boolean isSapling,
+                                           boolean randomRotation, // Toegevoegd
                                            Orientation orientation) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
@@ -42,6 +43,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
                     Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), BlockStateProvider.CODEC).fieldOf("replace_from_nbt").forGetter(TreeFromStructureNBTConfigV2::replaceFromNBT),
                     Codec.BOOL.optionalFieldOf("sapling", false).forGetter(TreeFromStructureNBTConfigV2::isSapling),
+                    Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(TreeFromStructureNBTConfigV2::randomRotation),
                     Orientation.CODEC.optionalFieldOf("orientation", Orientation.STANDARD).forGetter(TreeFromStructureNBTConfigV2::orientation)
             ).apply(builder, TreeFromStructureNBTConfigV2::new)
     );
@@ -51,24 +53,17 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         UPSIDE_DOWN,
         SIDEWAYS;
 
-        public static final Codec<Orientation> CODEC = Codec.STRING.xmap(s -> Orientation.valueOf(s.toUpperCase()), s -> s.name().toUpperCase()); // Guards against case issues
+        public static final Codec<Orientation> CODEC = Codec.STRING.xmap(s -> Orientation.valueOf(s.toUpperCase()), s -> s.name().toUpperCase());
     }
 
     public static class Builder {
-        @Nullable
-        private ResourceLocation baseLocation;
-        @Nullable
-        private ResourceLocation canopyLocation;
-        @Nullable
-        private IntProvider height;
-        @Nullable
-        private BlockStateProvider logProvider;
-        @Nullable
-        private List<BlockStateProvider> leavesProvider;
-        @Nullable
-        private Set<Block> logTarget;
-        @Nullable
-        private List<Block> leavesTarget;
+        @Nullable private ResourceLocation baseLocation;
+        @Nullable private ResourceLocation canopyLocation;
+        @Nullable private IntProvider height;
+        @Nullable private BlockStateProvider logProvider;
+        @Nullable private List<BlockStateProvider> leavesProvider;
+        @Nullable private Set<Block> logTarget;
+        @Nullable private List<Block> leavesTarget;
         private BlockPredicate growableOn = BlockPredicate.replaceable();
         private BlockPredicate leavesPlacementFilter = BlockPredicate.replaceable();
         private int maxLogDepth = 5;
@@ -76,98 +71,27 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
         private boolean isSapling = false;
         private Orientation orientation = Orientation.STANDARD;
+        private boolean randomRotation = true;
 
-        public Builder baseLocation(ResourceLocation baseLocation) {
-            this.baseLocation = baseLocation;
-            return this;
-        }
-
-        public Builder canopyLocation(ResourceLocation canopyLocation) {
-            this.canopyLocation = canopyLocation;
-            return this;
-        }
-
-        public Builder height(IntProvider height) {
-            this.height = height;
-            return this;
-        }
-
-        public Builder logProvider(BlockStateProvider logProvider) {
-            this.logProvider = logProvider;
-            return this;
-        }
-
-        public Builder leavesProvider(List<BlockStateProvider> leavesProvider) {
-            this.leavesProvider = leavesProvider;
-            return this;
-        }
-
-        public Builder logTarget(Set<Block> logTarget) {
-            this.logTarget = logTarget;
-            return this;
-        }
-
-        public Builder leavesTarget(List<Block> leavesTarget) {
-            this.leavesTarget = leavesTarget;
-            return this;
-        }
-
-        public Builder growableOn(BlockPredicate growableOn) {
-            this.growableOn = growableOn;
-            return this;
-        }
-
-        public Builder leavesPlacementFilter(BlockPredicate leavesPlacementFilter) {
-            this.leavesPlacementFilter = leavesPlacementFilter;
-            return this;
-        }
-
-        public Builder maxLogDepth(int maxLogDepth) {
-            this.maxLogDepth = maxLogDepth;
-            return this;
-        }
-
-        public Builder treeDecorators(List<TreeDecorator> treeDecorators) {
-            this.treeDecorators = treeDecorators;
-            return this;
-        }
-
-        public Builder replaceFromNBT(Map<Block, BlockStateProvider> placeFromNBT) {
-            this.replaceFromNBT = placeFromNBT;
-            return this;
-        }
-
-        public Builder isSapling(boolean isSapling) {
-            this.isSapling = isSapling;
-            return this;
-        }
-
-        public Builder orientation(Orientation orientation) {
-            this.orientation = orientation;
-            return this;
-        }
+        public Builder baseLocation(ResourceLocation baseLocation) { this.baseLocation = baseLocation; return this; }
+        public Builder canopyLocation(ResourceLocation canopyLocation) { this.canopyLocation = canopyLocation; return this; }
+        public Builder height(IntProvider height) { this.height = height; return this; }
+        public Builder logProvider(BlockStateProvider logProvider) { this.logProvider = logProvider; return this; }
+        public Builder leavesProvider(List<BlockStateProvider> leavesProvider) { this.leavesProvider = leavesProvider; return this; }
+        public Builder logTarget(Set<Block> logTarget) { this.logTarget = logTarget; return this; }
+        public Builder leavesTarget(List<Block> leavesTarget) { this.leavesTarget = leavesTarget; return this; }
+        public Builder growableOn(BlockPredicate growableOn) { this.growableOn = growableOn; return this; }
+        public Builder leavesPlacementFilter(BlockPredicate leavesPlacementFilter) { this.leavesPlacementFilter = leavesPlacementFilter; return this; }
+        public Builder maxLogDepth(int maxLogDepth) { this.maxLogDepth = maxLogDepth; return this; }
+        public Builder treeDecorators(List<TreeDecorator> treeDecorators) { this.treeDecorators = treeDecorators; return this; }
+        public Builder replaceFromNBT(Map<Block, BlockStateProvider> replaceFromNBT) { this.replaceFromNBT = replaceFromNBT; return this; }
+        public Builder isSapling(boolean isSapling) { this.isSapling = isSapling; return this; }
+        public Builder orientation(Orientation orientation) { this.orientation = orientation; return this; }
+        public Builder randomRotation(boolean randomRotation) { this.randomRotation = randomRotation; return this; }
 
         public TreeFromStructureNBTConfigV2 build() {
-            if (baseLocation == null) {
-                throw new IllegalStateException("Base location cannot be null");
-            }
-            if (canopyLocation == null) {
-                throw new IllegalStateException("Canopy location cannot be null");
-            }
-            if (height == null) {
-                throw new IllegalStateException("Height cannot be null");
-            }
-            if (logProvider == null) {
-                throw new IllegalStateException("Log provider cannot be null");
-            }
-            if (leavesProvider == null) {
-                throw new IllegalStateException("Leaves provider cannot be null");
-            }
-            if (logTarget == null) {
-                throw new IllegalStateException("Log target cannot be null");
-            }
-            if (leavesTarget == null) {
-                throw new IllegalStateException("Leaves target cannot be null");
+            if (baseLocation == null || canopyLocation == null || height == null || logProvider == null || leavesProvider == null || logTarget == null || leavesTarget == null) {
+                throw new IllegalStateException("Missing required parameters for TreeFromStructureNBTConfigV2");
             }
 
             return new TreeFromStructureNBTConfigV2(
@@ -184,6 +108,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     treeDecorators,
                     replaceFromNBT,
                     isSapling,
+                    randomRotation,
                     orientation
             );
         }
