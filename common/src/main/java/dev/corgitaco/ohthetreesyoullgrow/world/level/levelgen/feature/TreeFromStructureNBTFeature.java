@@ -83,7 +83,8 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
 
         RandomSource random = featurePlaceContext.random();
-        StructurePlaceSettings placeSettings = new StructurePlaceSettings().setRotation(Rotation.getRandom(random));
+        Rotation rotation = config.randomRotation() ? Rotation.getRandom(random) : Rotation.NONE;
+        StructurePlaceSettings placeSettings = new StructurePlaceSettings().setRotation(rotation);
         StructureTemplate.Palette trunkBasePalette = placeSettings.getRandomPalette(basePalettes, origin);
         StructureTemplate.Palette randomCanopyPalette = placeSettings.getRandomPalette(canopyPalettes, origin);
 

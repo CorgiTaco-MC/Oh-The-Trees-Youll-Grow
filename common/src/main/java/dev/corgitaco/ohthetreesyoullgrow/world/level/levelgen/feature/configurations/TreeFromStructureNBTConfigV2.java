@@ -24,6 +24,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
                                            Map<Block, BlockStateProvider> replaceFromNBT,
+                                           boolean randomRotation,
                                            Orientation orientation) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
@@ -43,6 +44,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfigV2::maxLogDepth),
                     TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
                     Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), BlockStateProvider.CODEC).fieldOf("replace_from_nbt").forGetter(TreeFromStructureNBTConfigV2::replaceFromNBT),
+                    Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(TreeFromStructureNBTConfigV2::randomRotation),
                     Orientation.CODEC.optionalFieldOf("orientation", Orientation.STANDARD).forGetter(TreeFromStructureNBTConfigV2::orientation)
             ).apply(builder, TreeFromStructureNBTConfigV2::new)
     );
@@ -76,6 +78,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         private int maxLogDepth = 5;
         private List<TreeDecorator> treeDecorators = new ArrayList<>();
         private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
+        private boolean randomRotation = true;
         private Orientation orientation = Orientation.STANDARD;
 
         public Builder baseLocation(ResourceLocation baseLocation) {
@@ -143,6 +146,11 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
             return this;
         }
 
+        public Builder randomRotation(boolean randomRotation) {
+            this.randomRotation = randomRotation;
+            return this;
+        }
+
         public Builder orientation(Orientation orientation) {
             this.orientation = orientation;
             return this;
@@ -185,6 +193,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     maxLogDepth,
                     treeDecorators,
                     replaceFromNBT,
+                    randomRotation,
                     orientation
             );
         }
