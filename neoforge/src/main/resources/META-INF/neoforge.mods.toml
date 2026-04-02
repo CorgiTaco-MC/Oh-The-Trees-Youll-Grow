@@ -17,14 +17,14 @@ logoFile = "logo.png"
 [[dependencies.ohthetreesyoullgrow]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.0,)"
+versionRange = "[26.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ohthetreesyoullgrow]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21,)"
+versionRange = "[26.1,)"
 ordering = "NONE"
 side = "BOTH"
 

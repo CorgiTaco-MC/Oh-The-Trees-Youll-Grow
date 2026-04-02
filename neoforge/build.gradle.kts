@@ -1,71 +1,53 @@
+import org.gradle.api.attributes.Attribute
 import com.hypherionmc.modpublisher.properties.CurseEnvironment
 import com.hypherionmc.modpublisher.properties.ModLoader
 import com.hypherionmc.modpublisher.properties.ReleaseType
 
+
 plugins {
-    id("com.gradleup.shadow")
+    id("multiloader-loader")
+    id("net.neoforged.moddev")
     id("com.hypherionmc.modutils.modpublisher") version "2.+"
 }
 
-architectury {
-    platformSetupLoomIde()
-    neoForge()
-}
+val neoforge_version: String by project
+val mod_id: String by project
 
-val minecraftVersion = project.properties["minecraft_version"] as String
+val loaderAttribute = Attribute.of("io.github.mcgradleconventions.loader", String::class.java)
 
-configurations {
-    create("common")
-    "common" {
-        isCanBeResolved = true
-        isCanBeConsumed = false
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    val at = project(":common").file("src/main/resources/META-INF/accesstransformer.cfg")
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
     }
-    create("shadowBundle")
-    compileClasspath.get().extendsFrom(configurations["common"])
-    runtimeClasspath.get().extendsFrom(configurations["common"])
-    getByName("developmentNeoForge").extendsFrom(configurations["common"])
-    "shadowBundle" {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-}
-
-loom {
-    accessWidenerPath.set(project(":common").loom.accessWidenerPath)
-    runs.create("datagen") {
-        data()
-        programArgs("--all", "--mod", "ohthetreesyoullgrow")
-        programArgs("--output", project(":common").file("src/main/generated/resources").absolutePath)
-        programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
-    }
-}
-
-dependencies {
-    neoForge("net.neoforged:neoforge:${project.properties["neoforge_version"]}")
-
-    "common"(project(":common", "namedElements")) { isTransitive = false }
-    "shadowBundle"(project(":common", "transformProductionNeoForge"))
-}
-
-tasks {
-    processResources {
-        inputs.property("version", project.version)
-
-        filesMatching("META-INF/neoforge.mods.toml") {
-            expand(mapOf("version" to project.version))
+    mods {
+        create(mod_id) {
+            sourceSet(sourceSets.main.get())
         }
     }
+}
 
-    shadowJar {
-        exclude("architectury.common.json", ".cache/**", "dev/corgitaco/ohthetreesyoullgrow/neoforge/data/**")
-        configurations = listOf(project.configurations.getByName("shadowBundle"))
-        archiveClassifier.set("dev-shadow")
+sourceSets.named("main") {
+    resources.srcDir("src/generated/resources")
+}
+
+// Implement mcgradleconventions loader attribute
+listOf("apiElements", "runtimeElements", "sourcesElements", "javadocElements").forEach { variant ->
+    configurations.named(variant) {
+        attributes {
+            attribute(loaderAttribute, "neoforge")
+        }
     }
-
-    remapJar {
-        inputFile.set(shadowJar.get().archiveFile)
-        dependsOn(shadowJar)
-        atAccessWideners.add("ohthetreesyoullgrow.accesswidener")
+}
+sourceSets.configureEach {
+    listOf(compileClasspathConfigurationName, runtimeClasspathConfigurationName, getTaskName(null, "jarJar")).forEach { variant ->
+        configurations.named(variant) {
+            attributes {
+                attribute(loaderAttribute, "neoforge")
+            }
+        }
     }
 }
 
@@ -78,16 +60,16 @@ publisher {
 
     curseID.set(project.properties["curseforge_id"].toString())
     modrinthID.set(project.properties["modrinth_id"].toString())
-    githubRepo.set("https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow")
+    githubRepo.set("https://github.com/CorgiTaco/Data-Anchor/")
     setReleaseType(ReleaseType.RELEASE)
-    projectVersion.set("$minecraftVersion-${project.version}-NeoForge")
-    displayName.set("${project.properties["mod_name"]}-NeoForge-$minecraftVersion-${project.version}")
+    projectVersion.set("${project.version}-neoforge")
+    displayName.set(project.base.archivesName)
     changelog.set(projectDir.toPath().parent.resolve("CHANGELOG.md").toFile().readText())
-    artifact.set(tasks.remapJar)
-    setGameVersions(minecraftVersion)
+    artifact.set(tasks.jar.get().archiveFile.get().asFile)
+    setGameVersions("${project.properties["minecraft_version"]}")
     setLoaders(ModLoader.NEOFORGE)
-    setCurseEnvironment(CurseEnvironment.SERVER)
-    setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22)
+    setCurseEnvironment(CurseEnvironment.BOTH)
+    setJavaVersions(JavaVersion.VERSION_21)
 }
 
 private fun getPublishingCredentials(): Pair<String?, String?> {

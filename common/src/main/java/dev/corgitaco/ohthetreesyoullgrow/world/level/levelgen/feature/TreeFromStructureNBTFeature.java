@@ -4,12 +4,12 @@ import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -56,9 +56,9 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         WorldGenLevel level = featurePlaceContext.level();
         StructureTemplateManager templateManager = level.getLevel().getStructureManager();
-        ResourceLocation baseLocation = config.baseLocation();
+        Identifier baseLocation = config.baseLocation();
         Optional<StructureTemplate> baseTemplateOptional = templateManager.get(baseLocation);
-        ResourceLocation canopyLocation = config.canopyLocation();
+        Identifier canopyLocation = config.canopyLocation();
         Optional<StructureTemplate> canopyTemplateOptional = templateManager.get(canopyLocation);
 
         if (baseTemplateOptional.isEmpty()) {
@@ -343,7 +343,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         for (StructureTemplate.StructureBlockInfo trunk : logs) {
             BlockPos pos = getModifiedPos(placeSettings, trunk, centerOffset, origin);
             pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
-            trunkPositions.put(pos.immutable(), getTransformedState(pos, logProvider.getState(random, pos), trunk.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+            trunkPositions.put(pos.immutable(), getTransformedState(pos, logProvider.getState(level, random, pos), trunk.state(), placeSettings.getRotation(), level, treeGrowthDirection));
         }
     }
 
@@ -362,7 +362,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             modifiedPos = rotateInDirectionAroundOrigin(modifiedPos, origin, treeGrowthDirection);
 
             if (leavesPlacementFilter.test(level, modifiedPos)) {
-                leavePositions.put(modifiedPos.immutable(), getTransformedState(modifiedPos, leavesProvider.getState(random, modifiedPos), leaf.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+                leavePositions.put(modifiedPos.immutable(), getTransformedState(modifiedPos, leavesProvider.getState(level, random, modifiedPos), leaf.state(), placeSettings.getRotation(), level, treeGrowthDirection));
             }
         }
     }
@@ -375,7 +375,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
             for (int i = 0; i < maxTrunkBuildingDepth; i++) {
                 if (!groundFilter.test(level, mutableBlockPos) && !level.getBlockState(mutableBlockPos).is(Blocks.BEDROCK)) {
-                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(level, random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
                     mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
                     ((RandomTickScheduler) level.getChunk(mutableBlockPos)).scheduleRandomTick(mutableBlockPos.immutable());
@@ -393,7 +393,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
             for (int i = 0; i <= maxTrunkBuildingDepth; i++) {
                 if (!trunkPositions.containsKey(mutableBlockPos)) {
-                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
+                    trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(level, random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
                     mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
                     break;
@@ -451,7 +451,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         };
     }
 
-    public static IllegalArgumentException noTreePartPresent(ResourceLocation location) {
+    public static IllegalArgumentException noTreePartPresent(Identifier location) {
         return new IllegalArgumentException(String.format("\"%s\" is not a valid tree part.", location));
     }
 

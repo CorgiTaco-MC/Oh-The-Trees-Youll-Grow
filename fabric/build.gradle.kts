@@ -1,66 +1,56 @@
+import org.gradle.api.attributes.Attribute
 import com.hypherionmc.modpublisher.properties.CurseEnvironment
 import com.hypherionmc.modpublisher.properties.ModLoader
 import com.hypherionmc.modpublisher.properties.ReleaseType
 
 plugins {
-    id("com.gradleup.shadow")
+    id("multiloader-loader")
+    id("net.fabricmc.fabric-loom")
     id("com.hypherionmc.modutils.modpublisher") version "2.+"
 }
 
-architectury {
-    platformSetupLoomIde()
-    fabric()
-}
+val minecraft_version: String by project
+val fabric_loader_version: String by project
+val fabric_version: String by project
+val mod_id: String by project
 
-val minecraftVersion = project.properties["minecraft_version"] as String
-
-configurations {
-    create("common")
-    "common" {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-    create("shadowBundle")
-    compileClasspath.get().extendsFrom(configurations["common"])
-    runtimeClasspath.get().extendsFrom(configurations["common"])
-    getByName("developmentFabric").extendsFrom(configurations["common"])
-    "shadowBundle" {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-}
-
-loom.accessWidenerPath.set(project(":common").loom.accessWidenerPath)
+val loaderAttribute = Attribute.of("io.github.mcgradleconventions.loader", String::class.java)
 
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}+$minecraftVersion")
-
-    "common"(project(":common", "namedElements")) { isTransitive = false }
-    "shadowBundle"(project(":common", "transformProductionFabric"))
+    add("minecraft", "com.mojang:minecraft:$minecraft_version")
+    add("implementation", "net.fabricmc:fabric-loader:$fabric_loader_version")
+    add("implementation", "net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }
 
-tasks {
-    processResources {
-        inputs.property("version", project.version)
+loom {
+    val aw = project(":common").file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
+}
 
-        filesMatching("fabric.mod.json") {
-            expand(mapOf("version" to project.version))
+tasks.named("publishMod") {
+    dependsOn(tasks.named("build"))
+}
+
+// Implement mcgradleconventions loader attribute
+listOf("apiElements", "runtimeElements", "sourcesElements", "javadocElements", "includeInternal", "modCompileClasspath").forEach { variant ->
+    configurations.named(variant) {
+        attributes {
+            attribute(loaderAttribute, "fabric")
         }
     }
-
-    shadowJar {
-        exclude("architectury.common.json")
-        configurations = listOf(project.configurations.getByName("shadowBundle"))
-        archiveClassifier.set("dev-shadow")
-    }
-
-    remapJar {
-        injectAccessWidener.set(true)
-        inputFile.set(shadowJar.get().archiveFile)
-        dependsOn(shadowJar)
+}
+sourceSets.configureEach {
+    listOf(compileClasspathConfigurationName, runtimeClasspathConfigurationName).forEach { variant ->
+        configurations.named(variant) {
+            attributes {
+                attribute(loaderAttribute, "fabric")
+            }
+        }
     }
 }
+
 
 publisher {
     apiKeys {
@@ -71,16 +61,16 @@ publisher {
 
     curseID.set(project.properties["curseforge_id"].toString())
     modrinthID.set(project.properties["modrinth_id"].toString())
-    githubRepo.set("https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow")
+    githubRepo.set("https://github.com/CorgiTaco/Data-Anchor/")
     setReleaseType(ReleaseType.RELEASE)
-    projectVersion.set("$minecraftVersion-${project.version}-Fabric")
-    displayName.set("${project.properties["mod_name"]}-Fabric-$minecraftVersion-${project.version}")
+    projectVersion.set("${project.version}-fabric")
+    displayName.set(project.base.archivesName)
     changelog.set(projectDir.toPath().parent.resolve("CHANGELOG.md").toFile().readText())
-    artifact.set(tasks.remapJar)
-    setGameVersions(minecraftVersion)
+    artifact.set(tasks.jar.get().archiveFile.get().asFile)
+    setGameVersions("${project.properties["minecraft_version"]}")
     setLoaders(ModLoader.FABRIC, ModLoader.QUILT)
-    setCurseEnvironment(CurseEnvironment.SERVER)
-    setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22)
+    setCurseEnvironment(CurseEnvironment.BOTH)
+    setJavaVersions(JavaVersion.VERSION_17, JavaVersion.VERSION_18, JavaVersion.VERSION_19, JavaVersion.VERSION_20, JavaVersion.VERSION_21)
     val depends = mutableListOf("fabric-api")
     curseDepends.required.set(depends)
     modrinthDepends.required.set(depends)
@@ -91,3 +81,4 @@ private fun getPublishingCredentials(): Pair<String?, String?> {
     val modrinthToken = (project.findProperty("modrinth_key") ?: System.getenv("MODRINTH_KEY") ?: "") as String?
     return Pair(curseForgeToken, modrinthToken)
 }
+

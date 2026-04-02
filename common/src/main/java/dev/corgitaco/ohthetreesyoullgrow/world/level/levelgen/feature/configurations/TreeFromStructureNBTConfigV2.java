@@ -4,8 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.IntProviders;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, ResourceLocation canopyLocation,
+public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier canopyLocation,
                                            IntProvider height,
                                            BlockStateProvider logProvider, List<BlockStateProvider> leavesProvider,
                                            Set<Block> logTarget, List<Block> leavesTarget,
@@ -31,9 +32,9 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
 
     public static final Codec<TreeFromStructureNBTConfigV2> CODEC = RecordCodecBuilder.create(builder ->
             builder.group(
-                    ResourceLocation.CODEC.fieldOf("base_location").forGetter(TreeFromStructureNBTConfigV2::baseLocation),
-                    ResourceLocation.CODEC.fieldOf("canopy_location").forGetter(TreeFromStructureNBTConfigV2::canopyLocation),
-                    IntProvider.CODEC.fieldOf("height").forGetter(TreeFromStructureNBTConfigV2::height),
+                    Identifier.CODEC.fieldOf("base_location").forGetter(TreeFromStructureNBTConfigV2::baseLocation),
+                    Identifier.CODEC.fieldOf("canopy_location").forGetter(TreeFromStructureNBTConfigV2::canopyLocation),
+                    IntProviders.CODEC.fieldOf("height").forGetter(TreeFromStructureNBTConfigV2::height),
                     BlockStateProvider.CODEC.fieldOf("log_provider").forGetter(TreeFromStructureNBTConfigV2::logProvider),
                     BlockStateProvider.CODEC.listOf().fieldOf("leaves_provider").forGetter(TreeFromStructureNBTConfigV2::leavesProvider),
                     BLOCK_SET_CODEC.fieldOf("log_target").forGetter(TreeFromStructureNBTConfigV2::logTarget),
@@ -59,9 +60,9 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
 
     public static class Builder {
         @Nullable
-        private ResourceLocation baseLocation;
+        private Identifier baseLocation;
         @Nullable
-        private ResourceLocation canopyLocation;
+        private Identifier canopyLocation;
         @Nullable
         private IntProvider height;
         @Nullable
@@ -81,12 +82,12 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         private boolean randomRotation = true;
         private Orientation orientation = Orientation.STANDARD;
 
-        public Builder baseLocation(ResourceLocation baseLocation) {
+        public Builder baseLocation(Identifier baseLocation) {
             this.baseLocation = baseLocation;
             return this;
         }
 
-        public Builder canopyLocation(ResourceLocation canopyLocation) {
+        public Builder canopyLocation(Identifier canopyLocation) {
             this.canopyLocation = canopyLocation;
             return this;
         }

@@ -1,21 +1,40 @@
-pluginManagement.repositories {
-    maven("https://maven.fabricmc.net/")
-    maven("https://maven.architectury.dev/")
-    maven("https://maven.minecraftforge.net/")
-    maven("https://maven.neoforged.net/releases/")
-    maven("https://maven.firstdark.dev/releases")
-    gradlePluginPortal()
+pluginManagement {
+    repositories {
+        maven("https://maven.firstdark.dev/releases")
+        gradlePluginPortal()
+        mavenCentral()
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Fabric"
+                    url = uri("https://maven.fabricmc.net")
+                }
+            }
+            filter {
+                includeGroupAndSubgroups("net.fabricmc")
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Sponge"
+                    url = uri("https://repo.spongepowered.org/repository/maven-public")
+                }
+            }
+            filter {
+                includeGroupAndSubgroups("org.spongepowered")
+            }
+        }
+    }
 }
 
 plugins {
-    id("com.gradle.develocity") version("4.2.2")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-develocity.buildScan {
-    termsOfUseUrl = "https://gradle.com/terms-of-service"
-    termsOfUseAgree = "yes"
-}
+// This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
+rootProject.name = "Data Anchor"
+include("common")
+include("fabric")
+include("neoforge")
 
-include("common", "fabric", "forge", "neoforge")
-
-rootProject.name = "Oh The Trees You'll Grow"

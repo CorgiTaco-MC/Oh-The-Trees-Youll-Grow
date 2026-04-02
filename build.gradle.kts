@@ -1,85 +1,22 @@
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
-
 plugins {
-    id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.10-SNAPSHOT" apply false
-    id("com.gradleup.shadow") version "9.2.2" apply false
-    java
-    idea
-    `maven-publish`
-}
+    // see https://fabricmc.net/develop/ for new versions
+    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT" apply false
+    // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
+    id("net.neoforged.moddev") version "2.0.141" apply false
 
-val minecraftVersion = project.properties["minecraft_version"] as String
-architectury.minecraft = minecraftVersion
-
-allprojects {
-    version = project.properties["version"] as String
-    group = project.properties["group"] as String
+    kotlin("jvm") version "2.3.0"
 }
 
 subprojects {
-    apply(plugin = "dev.architectury.loom")
-    apply(plugin = "architectury-plugin")
-    apply(plugin = "maven-publish")
-
-    base.archivesName.set(project.properties["archives_base_name"] as String + "-${project.name}-$minecraftVersion")
-
-    val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
-    loom.silentMojangMappingsLicense()
-
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven("https://maven.parchmentmc.org")
-        maven("https://maven.fabricmc.net/")
-        maven("https://maven.minecraftforge.net/")
-        maven("https://maven.neoforged.net/releases/")
-        maven("https://maven.architectury.dev/")
-    }
-
-    @Suppress("UnstableApiUsage")
-    dependencies {
-        "minecraft"("com.mojang:minecraft:$minecraftVersion")
-        "mappings"(loom.layered{
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$minecraftVersion:${project.properties["parchment"]}@zip")
-        })
-
-        compileOnly("org.jetbrains:annotations:26.0.2")
-        compileOnly("com.google.auto.service:auto-service:1.1.1")
-        annotationProcessor("com.google.auto.service:auto-service:1.1.1")
-    }
-
-    java {
-        withSourcesJar()
-
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    tasks.withType<JavaCompile>().configureEach {
-        options.release.set(21)
-    }
-
-    publishing {
-        publications.create<MavenPublication>("mavenJava") {
-            artifactId = project.properties["archives_base_name"] as String + "-${project.name}"
-            version = minecraftVersion + "-" + project.version.toString()
-            from(components["java"])
-        }
-
-        repositories {
-            mavenLocal()
-            maven {
-                val releasesRepoUrl = "https://maven.jt-dev.tech/releases"
-                val snapshotsRepoUrl = "https://maven.jt-dev.tech/snapshots"
-                url = uri(if (project.version.toString().endsWith("SNAPSHOT") || project.version.toString().startsWith("0")) snapshotsRepoUrl else releasesRepoUrl)
-                name = "JTDev-Maven-Repository"
-                credentials {
-                    username = project.properties["repoLogin"]?.toString()
-                    password = project.properties["repoPassword"]?.toString()
-                }
-            }
+    // Only configure Java dependency buckets after the Java plugin is applied.
+    pluginManager.withPlugin("java") {
+        dependencies {
+            add("compileOnly", "com.google.auto.service:auto-service:1.1.1")
+            add("annotationProcessor", "com.google.auto.service:auto-service:1.1.1")
         }
     }
+}
+
+repositories {
+    mavenCentral()
 }

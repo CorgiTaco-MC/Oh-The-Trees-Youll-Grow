@@ -3,12 +3,12 @@ package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configura
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator;
@@ -83,7 +83,7 @@ public class AttachedToFruitLeavesDecorator extends AttachedToLeavesDecorator {
                 positions.add(blockPos.immutable());
             }
 
-            context.setBlock(relativePos, this.blockProvider.getState(random, relativePos));
+            context.setBlock(relativePos, this.blockProvider.getState(context.level(), random, relativePos));
         }
     }
 

@@ -7,10 +7,10 @@ import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurat
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -181,7 +181,7 @@ public class TYGConfiguredFeatures {
                     .leavesProvider(BlockStateProvider.simple(Blocks.RED_MUSHROOM_BLOCK))
                     .logTarget(Set.of(Blocks.MUSHROOM_STEM))
                     .leavesTarget(Set.of(Blocks.RED_MUSHROOM_BLOCK))
-                    .growableOn(BlockPredicate.matchesTag(BlockTags.MUSHROOM_GROW_BLOCK))
+                    .growableOn(BlockPredicate.matchesTag(BlockTags.HUGE_BROWN_MUSHROOM_CAN_PLACE_ON))
                     .maxLogDepth(3)
                     .build()
     );
@@ -195,7 +195,7 @@ public class TYGConfiguredFeatures {
                     .leavesProvider(BlockStateProvider.simple(Blocks.BROWN_MUSHROOM_BLOCK))
                     .logTarget(Set.of(Blocks.MUSHROOM_STEM))
                     .leavesTarget(Set.of(Blocks.RED_MUSHROOM_BLOCK))
-                    .growableOn(BlockPredicate.matchesTag(BlockTags.MUSHROOM_GROW_BLOCK))
+                    .growableOn(BlockPredicate.matchesTag(BlockTags.HUGE_BROWN_MUSHROOM_CAN_PLACE_ON))
                     .maxLogDepth(3)
                     .build()
     );
@@ -211,14 +211,14 @@ public class TYGConfiguredFeatures {
                     .leavesTarget(List.of(Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
-                    .replaceFromNBT(Map.of(Blocks.SHROOMLIGHT, new WeightedStateProvider(SimpleWeightedRandomList.<BlockState>builder().add(Blocks.GLOWSTONE.defaultBlockState(), 3).add(Blocks.GLASS.defaultBlockState(), 1).build())))
+                    .replaceFromNBT(Map.of(Blocks.SHROOMLIGHT, new WeightedStateProvider(WeightedList.<BlockState>builder().add(Blocks.GLOWSTONE.defaultBlockState(), 3).add(Blocks.GLASS.defaultBlockState(), 1).build())))
                     .treeDecorators(List.of(new AlterGroundDecorator(SimpleStateProvider.simple(Blocks.MOSS_BLOCK))))
                     .build()
     );
 
 
     private static <FC extends FeatureConfiguration, F extends Feature<FC>> ResourceKey<ConfiguredFeature<?, ?>> createConfiguredFeature(String id, Supplier<? extends F> feature, Function<BootstrapContext<ConfiguredFeature<?, ?>>, ? extends FC> config) {
-        ResourceLocation tygID = Constants.createLocation(id);
+        Identifier tygID = Constants.createLocation(id);
 
         ResourceKey<ConfiguredFeature<?, ?>> configuredFeatureResourceKey = ResourceKey.create(Registries.CONFIGURED_FEATURE, tygID);
 
