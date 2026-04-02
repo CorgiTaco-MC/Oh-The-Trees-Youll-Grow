@@ -1,3 +1,6 @@
+# 5.3.0
+* Add the ability to turn on/off random tree rotation. 
+
 # 5.2.1
 * Fix issue with piercing walls and structures and bedrock
 
