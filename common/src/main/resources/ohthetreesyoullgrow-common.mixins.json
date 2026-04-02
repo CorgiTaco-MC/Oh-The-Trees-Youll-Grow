@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.corgitaco.ohthetreesyoullgrow.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinServerLevel",
+    "chunk.MixinChunkAccess",
+    "chunk.MixinChunkSerializer",
+    "chunk.MixinLevelChunk"
+  ],
+  "client": [
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
