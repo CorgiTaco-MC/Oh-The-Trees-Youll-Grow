@@ -27,6 +27,15 @@ neoForge {
             sourceSet(sourceSets.main.get())
         }
     }
+
+    runs {
+        create("neo_client") {
+            client()
+        }
+        create("neo_server") {
+            server()
+        }
+    }
 }
 
 sourceSets.named("main") {

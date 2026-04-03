@@ -52,6 +52,8 @@ sourceSets.configureEach {
 }
 
 
+
+
 publisher {
     apiKeys {
         curseforge(getPublishingCredentials().first)
