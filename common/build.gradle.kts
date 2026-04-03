@@ -71,3 +71,4 @@ sourceSets.configureEach {
 }
 
 
+sourceSets.main.get().resources.srcDir("src/main/generated/resources")

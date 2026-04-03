@@ -36,6 +36,6 @@ public class NeoForgeModPlatform implements ModPlatform {
 
     @Override
     public <T> Supplier<T> register(Registry<? super T> registry, String name, Supplier<T> value) {
-        return CACHED.computeIfAbsent(registry.key(), key -> DeferredRegister.create(registry.key().location(), Constants.MOD_ID)).register(name, value);
+        return CACHED.computeIfAbsent(registry.key(), key -> DeferredRegister.create(registry.key().identifier(), Constants.MOD_ID)).register(name, value);
     }
 }

@@ -24,7 +24,9 @@
         ]
     },
     "mixins": [
+      "ohthetreesyoullgrow-fabric.mixins.json",
         "ohthetreesyoullgrow.mixins.json"
+
     ],
     "depends": {
         "fabric-api": "*",
