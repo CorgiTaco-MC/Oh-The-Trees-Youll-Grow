@@ -1,3 +1,6 @@
+# 1.6.0
+* Add the ability to turn on/off random tree rotation.
+
 # 1.5.0
 * Add the ability to use blocks within the NBT to place Blockstates via Blockstate providers.
 * Allow the ability to specify multiple leave targets and multiple leave block state providers.
