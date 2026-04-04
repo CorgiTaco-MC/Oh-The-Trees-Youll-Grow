@@ -88,7 +88,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
         private List<TreeDecorator> treeDecorators = new ArrayList<>();
         private Set<Block> placeFromNBT = new HashSet<>();
         private boolean isSapling = false;
-        private boolean randomRotation = true; // Default waarde
+        private boolean randomRotation = true; 
         private Orientation orientation = Orientation.STANDARD;
 
         public Builder baseLocation(ResourceLocation baseLocation) { this.baseLocation = baseLocation; return this; }
@@ -108,7 +108,27 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
         public Builder orientation(Orientation orientation) { this.orientation = orientation; return this; }
 
         public TreeFromStructureNBTConfig build() {
-            // ... (validatie checks blijven hetzelfde)
+            if (baseLocation == null) {
+                throw new IllegalStateException("Base location cannot be null");
+            }
+            if (canopyLocation == null) {
+                throw new IllegalStateException("Canopy location cannot be null");
+            }
+            if (height == null) {
+                throw new IllegalStateException("Height cannot be null");
+            }
+            if (logProvider == null) {
+                throw new IllegalStateException("Log provider cannot be null");
+            }
+            if (leavesProvider == null) {
+                throw new IllegalStateException("Leaves provider cannot be null");
+            }
+            if (logTarget == null) {
+                throw new IllegalStateException("Log target cannot be null");
+            }
+            if (leavesTarget == null) {
+                throw new IllegalStateException("Leaves target cannot be null");
+            }
             return new TreeFromStructureNBTConfig(
                     baseLocation, canopyLocation, height, logProvider, leavesProvider,
                     logTarget, leavesTarget, growableOn, leavesPlacementFilter,
