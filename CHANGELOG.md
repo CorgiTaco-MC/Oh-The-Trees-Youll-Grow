@@ -1,3 +1,6 @@
+# 10.0.0
+* Update to 26.1.
+
 # 5.3.0
 * Add the ability to turn on/off random tree rotation. 
 
