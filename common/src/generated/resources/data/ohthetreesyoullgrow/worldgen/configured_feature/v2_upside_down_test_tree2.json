@@ -1,5 +1,5 @@
 {
-  "type": "ohthetreesyoullgrow:tree_from_nbt_v1",
+  "type": "ohthetreesyoullgrow:tree_from_nbt_v2",
   "config": {
     "base_location": "ohthetreesyoullgrow:features/trees/testv1/test_tree_trunk1",
     "can_grow_on_filter": {
@@ -7,6 +7,9 @@
       "tag": "minecraft:dirt"
     },
     "can_leaves_place_filter": {
+      "type": "minecraft:replaceable"
+    },
+    "can_logs_place_filter": {
       "type": "minecraft:replaceable"
     },
     "canopy_location": "ohthetreesyoullgrow:features/trees/testv1/test_tree_canopy1",
@@ -25,17 +28,19 @@
       "max_inclusive": 10,
       "min_inclusive": 5
     },
-    "leaves_provider": {
-      "type": "minecraft:simple_state_provider",
-      "state": {
-        "Name": "minecraft:jungle_leaves",
-        "Properties": {
-          "distance": "7",
-          "persistent": "false",
-          "waterlogged": "false"
+    "leaves_provider": [
+      {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "minecraft:jungle_leaves",
+          "Properties": {
+            "distance": "7",
+            "persistent": "false",
+            "waterlogged": "false"
+          }
         }
       }
-    },
+    ],
     "leaves_target": [
       "minecraft:oak_leaves"
     ],
@@ -52,6 +57,6 @@
       "minecraft:oak_log"
     ],
     "orientation": "UPSIDE_DOWN",
-    "place_from_nbt": []
+    "replace_from_nbt": {}
   }
 }

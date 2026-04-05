@@ -35,11 +35,23 @@ neoForge {
         create("neo_server") {
             server()
         }
+        create("neo_server_data") {
+            serverData()
+            programArguments.addAll(
+                "--mod",
+                mod_id,
+                "--all",
+                "--output",
+                project.project(":common").file("src/generated/resources/").absolutePath,
+                "--existing",
+                file("src/main/resources/").absolutePath
+            )
+        }
     }
 }
 
 sourceSets.named("main") {
-    resources.srcDir("src/generated/resources")
+    resources.srcDir(project(":common").file("src/generated/resources/").absolutePath)
 }
 
 // Implement mcgradleconventions loader attribute

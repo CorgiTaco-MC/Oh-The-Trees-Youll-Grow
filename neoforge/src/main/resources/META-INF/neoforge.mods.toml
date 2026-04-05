@@ -30,4 +30,5 @@ side = "BOTH"
 
 [[mixins]]
 config = "ohthetreesyoullgrow.mixins.json"
+[[mixins]]
 config = "ohthetreesyoullgrow-neoforge.mixins.json"

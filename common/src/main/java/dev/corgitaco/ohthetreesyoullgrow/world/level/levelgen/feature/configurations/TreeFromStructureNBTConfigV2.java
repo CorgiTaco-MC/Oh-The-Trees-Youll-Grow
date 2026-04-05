@@ -107,6 +107,11 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
             return this;
         }
 
+        public Builder leavesProvider(BlockStateProvider leavesProvider) {
+            this.leavesProvider = List.of(leavesProvider);
+            return this;
+        }
+
         public Builder logTarget(Set<Block> logTarget) {
             this.logTarget = logTarget;
             return this;

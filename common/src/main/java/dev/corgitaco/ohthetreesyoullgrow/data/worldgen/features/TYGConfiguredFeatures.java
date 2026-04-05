@@ -2,7 +2,6 @@ package dev.corgitaco.ohthetreesyoullgrow.data.worldgen.features;
 
 import dev.corgitaco.ohthetreesyoullgrow.Constants;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.TYGFeatures;
-import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfigV2;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
@@ -34,173 +33,173 @@ import java.util.function.Supplier;
 public class TYGConfiguredFeatures {
     public static final Map<ResourceKey<ConfiguredFeature<?, ?>>, ConfiguredFeatureFactory> CONFIGURED_FEATURES_FACTORIES = new Reference2ObjectOpenHashMap<>();
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_TREE1 = createConfiguredFeature("v1_test_tree_1", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE1 = createConfiguredFeature("v2_test_tree_1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.ACACIA_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.ACACIA_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
                     .treeDecorators(List.of(new AlterGroundDecorator(SimpleStateProvider.simple(Blocks.MOSS_BLOCK))))
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_TREE2 = createConfiguredFeature("v1_test_tree_2", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE2 = createConfiguredFeature("v2_test_tree_2", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.JUNGLE_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.JUNGLE_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(5)
                     .treeDecorators(List.of(new LeaveVineDecorator(0.5F), new BeehiveDecorator(0.2F)))
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_TREE3 = createConfiguredFeature("v1_test_tree_3", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE3 = createConfiguredFeature("v2_test_tree_3", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(20, 25))
                     .logProvider(BlockStateProvider.simple(Blocks.DIAMOND_BLOCK))
                     .leavesProvider(BlockStateProvider.simple(Blocks.EMERALD_BLOCK))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE1 = createConfiguredFeature("v1_upside_down_test_tree1", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE1 = createConfiguredFeature("v2_upside_down_test_tree1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.ACACIA_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.ACACIA_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
                     .treeDecorators(List.of(new AlterGroundDecorator(SimpleStateProvider.simple(Blocks.MOSS_BLOCK))))
-                    .orientation(TreeFromStructureNBTConfig.Orientation.UPSIDE_DOWN)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.UPSIDE_DOWN)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE2 = createConfiguredFeature("v1_upside_down_test_tree2", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE2 = createConfiguredFeature("v2_upside_down_test_tree2", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.JUNGLE_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.JUNGLE_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(5)
                     .treeDecorators(List.of(new LeaveVineDecorator(0.5F), new BeehiveDecorator(0.2F)))
-                    .orientation(TreeFromStructureNBTConfig.Orientation.UPSIDE_DOWN)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.UPSIDE_DOWN)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE3 = createConfiguredFeature("v1_upside_down_test_tree3", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_UPSIDE_DOWN_TEST_TREE3 = createConfiguredFeature("v2_upside_down_test_tree3", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(20, 25))
                     .logProvider(BlockStateProvider.simple(Blocks.DIAMOND_BLOCK))
                     .leavesProvider(BlockStateProvider.simple(Blocks.EMERALD_BLOCK))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
-                    .orientation(TreeFromStructureNBTConfig.Orientation.UPSIDE_DOWN)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.UPSIDE_DOWN)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE1 = createConfiguredFeature("v1_sideways_test_tree1", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE1 = createConfiguredFeature("v2_sideways_test_tree1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.ACACIA_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.ACACIA_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
                     .treeDecorators(List.of(new AlterGroundDecorator(SimpleStateProvider.simple(Blocks.MOSS_BLOCK))))
-                    .orientation(TreeFromStructureNBTConfig.Orientation.SIDEWAYS)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.SIDEWAYS)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE2 = createConfiguredFeature("v1_sideways_test_tree2", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE2 = createConfiguredFeature("v2_sideways_test_tree2", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.JUNGLE_LOG))
                     .leavesProvider(BlockStateProvider.simple(Blocks.JUNGLE_LEAVES))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(5)
                     .treeDecorators(List.of(new LeaveVineDecorator(0.5F), new BeehiveDecorator(0.2F)))
-                    .orientation(TreeFromStructureNBTConfig.Orientation.SIDEWAYS)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.SIDEWAYS)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE3 = createConfiguredFeature("v1_sideways_test_tree3", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_SIDEWAYS_TEST_TREE3 = createConfiguredFeature("v2_sideways_test_tree3", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv1/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv1/test_tree_canopy1"))
                     .height(UniformInt.of(20, 25))
                     .logProvider(BlockStateProvider.simple(Blocks.DIAMOND_BLOCK))
                     .leavesProvider(BlockStateProvider.simple(Blocks.EMERALD_BLOCK))
                     .logTarget(Set.of(Blocks.OAK_LOG))
-                    .leavesTarget(Set.of(Blocks.OAK_LEAVES))
+                    .leavesTarget(List.of(Blocks.OAK_LEAVES))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.DIRT))
                     .maxLogDepth(3)
-                    .orientation(TreeFromStructureNBTConfig.Orientation.SIDEWAYS)
+                    .orientation(TreeFromStructureNBTConfigV2.Orientation.SIDEWAYS)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_MUSHROOM1 = createConfiguredFeature("v1_test_mushroom_1", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_MUSHROOM1 = createConfiguredFeature("v2_test_mushroom_1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/mushrooms/testv1/test_mushroom_trunk1"))
                     .canopyLocation(Constants.createLocation("features/mushrooms/testv1/test_mushroom_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.MUSHROOM_STEM))
                     .leavesProvider(BlockStateProvider.simple(Blocks.RED_MUSHROOM_BLOCK))
                     .logTarget(Set.of(Blocks.MUSHROOM_STEM))
-                    .leavesTarget(Set.of(Blocks.RED_MUSHROOM_BLOCK))
+                    .leavesTarget(List.of(Blocks.RED_MUSHROOM_BLOCK))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.HUGE_BROWN_MUSHROOM_CAN_PLACE_ON))
                     .maxLogDepth(3)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_MUSHROOM2 = createConfiguredFeature("v1_test_mushroom_2", TYGFeatures.TREE_FROM_NBT_V1, ctx ->
-            new TreeFromStructureNBTConfig.Builder()
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V1_TEST_MUSHROOM2 = createConfiguredFeature("v2_test_mushroom_2", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+            new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/mushrooms/testv1/test_mushroom_trunk1"))
                     .canopyLocation(Constants.createLocation("features/mushrooms/testv1/test_mushroom_canopy1"))
                     .height(UniformInt.of(5, 10))
                     .logProvider(BlockStateProvider.simple(Blocks.MUSHROOM_STEM))
                     .leavesProvider(BlockStateProvider.simple(Blocks.BROWN_MUSHROOM_BLOCK))
                     .logTarget(Set.of(Blocks.MUSHROOM_STEM))
-                    .leavesTarget(Set.of(Blocks.RED_MUSHROOM_BLOCK))
+                    .leavesTarget(List.of(Blocks.RED_MUSHROOM_BLOCK))
                     .growableOn(BlockPredicate.matchesTag(BlockTags.HUGE_BROWN_MUSHROOM_CAN_PLACE_ON))
                     .maxLogDepth(3)
                     .build()
     );
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE1 = createConfiguredFeature("v2_test_tree_1", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
+    public static final ResourceKey<ConfiguredFeature<?, ?>> V2_TEST_TREE4 = createConfiguredFeature("v2_test_tree_4", TYGFeatures.TREE_FROM_NBT_V2, ctx ->
             new TreeFromStructureNBTConfigV2.Builder()
                     .baseLocation(Constants.createLocation("features/trees/testv2/test_tree_trunk1"))
                     .canopyLocation(Constants.createLocation("features/trees/testv2/test_tree_canopy1"))
