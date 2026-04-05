@@ -51,7 +51,9 @@ sourceSets.configureEach {
     }
 }
 
-
+sourceSets.named("main") {
+    resources.srcDir(project(":common").file("src/generated/resources/").absolutePath)
+}
 
 
 publisher {
