@@ -1,3 +1,6 @@
+# 10.0.1
+* Add back forge support.
+
 # 10.0.0
 * Update to 26.1.
 
