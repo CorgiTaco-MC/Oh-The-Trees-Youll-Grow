@@ -23,7 +23,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
                                            Map<Block, BlockStateProvider> replaceFromNBT, boolean isSapling,
-                                           boolean randomRotation, // Toegevoegd
+                                           boolean randomRotation,
                                            Orientation orientation) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
@@ -90,8 +90,26 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         public Builder randomRotation(boolean randomRotation) { this.randomRotation = randomRotation; return this; }
 
         public TreeFromStructureNBTConfigV2 build() {
-            if (baseLocation == null || canopyLocation == null || height == null || logProvider == null || leavesProvider == null || logTarget == null || leavesTarget == null) {
-                throw new IllegalStateException("Missing required parameters for TreeFromStructureNBTConfigV2");
+            if (baseLocation == null) {
+                throw new IllegalStateException("Base location cannot be null");
+            }
+            if (canopyLocation == null) {
+                throw new IllegalStateException("Canopy location cannot be null");
+            }
+            if (height == null) {
+                throw new IllegalStateException("Height cannot be null");
+            }
+            if (logProvider == null) {
+                throw new IllegalStateException("Log provider cannot be null");
+            }
+            if (leavesProvider == null) {
+                throw new IllegalStateException("Leaves provider cannot be null");
+            }
+            if (logTarget == null) {
+                throw new IllegalStateException("Log target cannot be null");
+            }
+            if (leavesTarget == null) {
+                throw new IllegalStateException("Leaves target cannot be null");
             }
 
             return new TreeFromStructureNBTConfigV2(
