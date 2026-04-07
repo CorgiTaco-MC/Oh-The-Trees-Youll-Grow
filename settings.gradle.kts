@@ -37,4 +37,5 @@ rootProject.name = "Oh The Trees You'll Grow"
 include("common")
 include("fabric")
 include("neoforge")
+include("forge")
 

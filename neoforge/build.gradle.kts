@@ -90,7 +90,7 @@ publisher {
     setGameVersions("${project.properties["minecraft_version"]}")
     setLoaders(ModLoader.NEOFORGE)
     setCurseEnvironment(CurseEnvironment.BOTH)
-    setJavaVersions(JavaVersion.VERSION_21)
+    setJavaVersions(JavaVersion.VERSION_25)
 }
 
 private fun getPublishingCredentials(): Pair<String?, String?> {

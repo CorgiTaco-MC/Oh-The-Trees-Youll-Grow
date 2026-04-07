@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
 issueTrackerURL = "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/issues"
-license = "LGPLv3"
+license = "MPL 2.0"
 
 [[mods]]
 modId = "ohthetreesyoullgrow"
@@ -19,14 +19,14 @@ modId = "neoforge"
 type = "required"
 versionRange = "[26.1,)"
 ordering = "NONE"
-side = "BOTH"
+side = "SERVER"
 
 [[dependencies.ohthetreesyoullgrow]]
 modId = "minecraft"
 type = "required"
 versionRange = "[26.1,)"
 ordering = "NONE"
-side = "BOTH"
+side = "SERVER"
 
 [[mixins]]
 config = "ohthetreesyoullgrow.mixins.json"

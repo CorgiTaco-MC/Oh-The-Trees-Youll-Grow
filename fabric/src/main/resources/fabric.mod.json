@@ -15,7 +15,7 @@
         "sources": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow",
         "issues": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/issues"
     },
-    "license": "LGPLv3",
+    "license": "MPL 2.0",
     "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
