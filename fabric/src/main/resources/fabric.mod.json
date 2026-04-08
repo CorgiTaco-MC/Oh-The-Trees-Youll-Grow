@@ -1,37 +1,37 @@
 {
-    "schemaVersion": 1,
-    "id": "ohthetreesyoullgrow",
-    "version": "${version}",
-    "name": "Oh The Trees You'll Grow",
-    "description": "A Minecraft library that aims to give users incredible configurability by allowing the creation of trees with Minecraft's structure template `.nbt` files.",
-    "authors": [
-        "Corgi Taco"
-    ],
-    "contributors": [
-        "Joseph T. McQuigg (JT122406)"
-    ],
-    "contact": {
-        "homepage": "https://curseforge.com/minecraft/mc-mods/oh-the-trees-youll-grow",
-        "sources": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow",
-        "issues": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/issues"
-    },
-    "license": "MPL 2.0",
-    "icon": "icon.png",
-    "environment": "*",
-    "entrypoints": {
-        "main": [
-            "dev.corgitaco.ohthetreesyoullgrow.fabric.OhTheTreesYoullGrowFabric"
-        ]
-    },
-    "mixins": [
-      "ohthetreesyoullgrow-fabric.mixins.json",
-        "ohthetreesyoullgrow.mixins.json"
-
-    ],
-    "depends": {
-        "fabric-api": "*",
-        "minecraft": ">=26.1",
-        "java": ">=25"
-    }
+  "schemaVersion": 1,
+  "id": "ohthetreesyoullgrow",
+  "version": "${version}",
+  "name": "Oh The Trees You'll Grow",
+  "description": "A Minecraft library that aims to give users incredible configurability by allowing the creation of trees with Minecraft's structure template `.nbt` files.",
+  "authors": [
+    "Corgi Taco"
+  ],
+  "contributors": [
+    "Joseph T. McQuigg (JT122406)"
+  ],
+  "contact": {
+    "homepage": "https://curseforge.com/minecraft/mc-mods/oh-the-trees-youll-grow",
+    "sources": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow",
+    "issues": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/issues"
+  },
+  "license": "MPL 2.0",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.corgitaco.ohthetreesyoullgrow.fabric.OhTheTreesYoullGrowFabric"
+    ]
+  },
+  "mixins": [
+    "ohthetreesyoullgrow-fabric.mixins.json",
+    "ohthetreesyoullgrow.mixins.json"
+  ],
+  "depends": {
+    "fabric-api": "*",
+    "minecraft": ">=26.1",
+    "java": ">=25"
+  },
+  "accessWidener": "ohthetreesyoullgrow.accesswidener"
 }
   
