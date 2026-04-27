@@ -1,3 +1,6 @@
+# 5.3.1
+* Use the correct filter when checking for valid tree growth positions.
+
 # 5.3.0
 * Add the ability to turn on/off random tree rotation. 
 
