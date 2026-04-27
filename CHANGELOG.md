@@ -1,3 +1,6 @@
+# 10.0.3
+* Use the correct filter when checking for valid tree growth positions.
+
 # 10.0.2
 * Internal fixes
 
