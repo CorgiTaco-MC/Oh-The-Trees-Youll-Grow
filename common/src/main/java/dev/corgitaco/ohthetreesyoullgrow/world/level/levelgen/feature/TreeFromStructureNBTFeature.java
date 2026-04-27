@@ -211,7 +211,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                 ChunkAccess chunk = level.getChunk(trunkPosition);
                 for (StructureStart value : chunk.getAllStarts().values()) {
                     for (StructurePiece piece : value.getPieces()) {
-                        if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                        if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                             return true;
                         }
                     }
@@ -231,7 +231,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                         StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
                         if (startForStructure != null) {
                             for (StructurePiece piece : startForStructure.getPieces()) {
-                                if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                                if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                                     return true;
                                 }
                             }
@@ -250,10 +250,6 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             }
         }
         return false;
-    }
-
-    private static boolean testValidPos(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos trunkPosition) {
-        return config.leavesPlacementFilter().test(level, trunkPosition);
     }
 
     private static void placeKnownBlockPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {

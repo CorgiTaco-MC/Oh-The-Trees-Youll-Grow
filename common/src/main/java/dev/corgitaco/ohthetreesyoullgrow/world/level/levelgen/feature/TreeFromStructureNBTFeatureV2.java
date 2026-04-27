@@ -126,8 +126,11 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             return false;
         }
 
-        if (validateLogPositions(logPositions, config, level)) {
-            return false; // Exit because some positions are not valid.
+        // Exit because some positions are not valid.
+        for (BlockPos trunkPosition : logPositions.keySet()) {
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
+                return false;
+            }
         }
 
 
@@ -212,7 +215,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                 ChunkAccess chunk = level.getChunk(trunkPosition);
                 for (StructureStart value : chunk.getAllStarts().values()) {
                     for (StructurePiece piece : value.getPieces()) {
-                        if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                        if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                             return true;
                         }
                     }
@@ -232,7 +235,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                         StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
                         if (startForStructure != null) {
                             for (StructurePiece piece : startForStructure.getPieces()) {
-                                if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                                if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                                     return true;
                                 }
                             }
@@ -242,19 +245,6 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             }
         }
         return false;
-    }
-
-    private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfigV2 config, WorldGenLevel level) {
-        for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean testValidPos(TreeFromStructureNBTConfigV2 config, WorldGenLevel level, BlockPos trunkPosition) {
-        return config.leavesPlacementFilter().test(level, trunkPosition);
     }
 
     private static void placeKnownBlockPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {
