@@ -1,3 +1,6 @@
+# 10.0.4
+* Fix default log placement filter.
+
 # 10.0.3
 * Use the correct filter when checking for valid tree growth positions.
 
