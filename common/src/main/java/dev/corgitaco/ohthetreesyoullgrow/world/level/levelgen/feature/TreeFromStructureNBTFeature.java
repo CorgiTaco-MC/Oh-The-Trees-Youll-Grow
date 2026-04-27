@@ -82,8 +82,6 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         }
 
 
-
-
         RandomSource random = featurePlaceContext.random();
         Rotation rotation = config.randomRotation() ? Rotation.getRandom(random) : Rotation.NONE;
         StructurePlaceSettings placeSettings = new StructurePlaceSettings().setRotation(rotation);
@@ -128,14 +126,13 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             return false;
         }
 
-        if (config.isSapling()) {
-            if (validateLogPositions(logPositions, config, level)) {
-                return false; // Exit because some positions are not valid.
-            }
+        if (validateLogPositions(logPositions, config, level)) {
+            return false; // Exit because some log positions are not valid.
         }
 
+
         if (insideStructure(logPositions, level, config)) {
-            return true; // Exit because the trunk position intersects with a structure.
+            return false; // Exit because the trunk position intersects with a structure.
         }
 
         placeKnownBlockPositions(logPositions, level);
@@ -148,9 +145,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         return true;
     }
 
-
-
-private static boolean doAllPositionsTouchGround(List<StructureTemplate.StructureBlockInfo> logBuilders, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, TreeFromStructureNBTConfig config, WorldGenLevel level, Direction direction) {
+    private static boolean doAllPositionsTouchGround(List<StructureTemplate.StructureBlockInfo> logBuilders, StructurePlaceSettings placeSettings, BlockPos centerOffset, BlockPos origin, TreeFromStructureNBTConfig config, WorldGenLevel level, Direction direction) {
         for (StructureTemplate.StructureBlockInfo logBuilder : logBuilders) {
             BlockPos pos = getModifiedPos(placeSettings, logBuilder, centerOffset, origin);
             pos = rotateInDirectionAroundOrigin(pos, origin, direction);
@@ -216,7 +211,7 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
                 ChunkAccess chunk = level.getChunk(trunkPosition);
                 for (StructureStart value : chunk.getAllStarts().values()) {
                     for (StructurePiece piece : value.getPieces()) {
-                        if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                        if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                             return true;
                         }
                     }
@@ -236,7 +231,7 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
                         StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
                         if (startForStructure != null) {
                             for (StructurePiece piece : startForStructure.getPieces()) {
-                                if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                                if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                                     return true;
                                 }
                             }
@@ -249,16 +244,23 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
     }
 
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfig config, WorldGenLevel level) {
+        List<Runnable> post = new ArrayList<>();
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!testValidPos(config, level, trunkPosition)) {
-                return true;
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
+                switch (config.treeLogFilterBehavior()) {
+                    case PIERCE:
+                        continue;
+                    case PASSTHROUGH:
+                        post.add(() -> logPositions.remove(trunkPosition));
+                        continue;
+                    case BLOCK:
+                        return true;
+                }
             }
         }
-        return false;
-    }
 
-    private static boolean testValidPos(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos trunkPosition) {
-        return config.leavesPlacementFilter().test(level, trunkPosition);
+        post.forEach(Runnable::run);
+        return false;
     }
 
     private static void placeKnownBlockPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {
@@ -443,7 +445,8 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
         BlockPos offset = pos.subtract(origin);
         return switch (direction) {
             case UP -> pos;
-            case DOWN -> new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getY(), origin.getZ() + offset.getZ());
+            case DOWN ->
+                    new BlockPos(origin.getX() + offset.getX(), origin.getY() - offset.getY(), origin.getZ() + offset.getZ());
             case EAST ->
                     new BlockPos(origin.getX() + offset.getY(), origin.getY() - offset.getX(), origin.getZ() + offset.getZ());
             case WEST ->
@@ -478,7 +481,7 @@ private static boolean doAllPositionsTouchGround(List<StructureTemplate.Structur
 
             return state;
         });
-        list.add( (modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
+        list.add((modifiedPos, lastState, nbtState, rotation, level, directionOfGrowth) -> {
             if (lastState.hasProperty(BlockStateProperties.WATERLOGGED)) {
                 FluidState fluidState = level.getFluidState(modifiedPos);
                 if (fluidState.is(Fluids.WATER) && fluidState.getAmount() >= 7) {

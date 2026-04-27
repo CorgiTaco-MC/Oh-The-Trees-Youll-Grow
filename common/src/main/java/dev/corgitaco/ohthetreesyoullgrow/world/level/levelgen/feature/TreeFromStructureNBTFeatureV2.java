@@ -126,11 +126,10 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             return false;
         }
 
-        if (config.isSapling()) {
-            if (validateLogPositions(logPositions, config, level)) {
-                return false; // Exit because some positions are not valid.
-            }
+        if (validateLogPositions(logPositions, config, level)) {
+            return false; // Exit because some log positions are not valid.
         }
+
 
         if (insideStructure(logPositions, level, config)) {
             return false; // Exit because the trunk position intersects with a structure.
@@ -213,7 +212,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                 ChunkAccess chunk = level.getChunk(trunkPosition);
                 for (StructureStart value : chunk.getAllStarts().values()) {
                     for (StructurePiece piece : value.getPieces()) {
-                        if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                        if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                             return true;
                         }
                     }
@@ -233,7 +232,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                         StructureStart startForStructure = referenceChunk.getStartForStructure(structure);
                         if (startForStructure != null) {
                             for (StructurePiece piece : startForStructure.getPieces()) {
-                                if (piece.getBoundingBox().isInside(trunkPosition) && !testValidPos(config, level, trunkPosition)) {
+                                if (piece.getBoundingBox().isInside(trunkPosition) && !config.logsPlacementFilter().test(level, trunkPosition)) {
                                     return true;
                                 }
                             }
@@ -247,15 +246,18 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
 
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfigV2 config, WorldGenLevel level) {
         for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!testValidPos(config, level, trunkPosition)) {
-                return true;
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
+                switch (config.treeLogFilterBehavior()) {
+                    case PIERCE:
+                        continue;
+                    case PASSTHROUGH:
+                        logPositions.remove(trunkPosition);
+                    case BLOCK:
+                        return true;
+                }
             }
         }
         return false;
-    }
-
-    private static boolean testValidPos(TreeFromStructureNBTConfigV2 config, WorldGenLevel level, BlockPos trunkPosition) {
-        return config.leavesPlacementFilter().test(level, trunkPosition);
     }
 
     private static void placeKnownBlockPositions(Map<BlockPos, BlockState> trunkPositions, WorldGenLevel level) {
