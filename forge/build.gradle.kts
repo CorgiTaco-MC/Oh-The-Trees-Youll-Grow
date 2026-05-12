@@ -91,7 +91,7 @@ publisher {
     setGameVersions(minecraftVersion)
     setLoaders(ModLoader.FORGE)
     setCurseEnvironment(CurseEnvironment.SERVER)
-    setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22)
+    setJavaVersions(JavaVersion.VERSION_21, JavaVersion.VERSION_22, JavaVersion.VERSION_25)
 }
 
 private fun getPublishingCredentials(): Pair<String?, String?> {
