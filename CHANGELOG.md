@@ -1,3 +1,6 @@
+# 5.3.2
+* Add the ability to define the log filter behavior. Filter options include: `PIERCE` - Destroy blocks in the filter. `PASSTHROUGH` - Tree will generate but skip blocks in filter. `BLOCK` - Tree will not generate if it meets a block in the filter.
+
 # 5.3.1
 * Use the correct filter when checking for valid tree growth positions.
 
