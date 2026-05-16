@@ -3,6 +3,7 @@ package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfigV2;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeLogFilterBehavior;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -126,11 +127,8 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             return false;
         }
 
-        // Exit because some positions are not valid.
-        for (BlockPos trunkPosition : logPositions.keySet()) {
-            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
-                return false;
-            }
+        if (validateLogPositions(logPositions, config, level)) {
+            return false; // Exit because some log positions are not valid.
         }
 
 
@@ -241,6 +239,22 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                             }
                         }
                     }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfigV2 config, WorldGenLevel level) {
+        for (BlockPos trunkPosition : logPositions.keySet()) {
+            if (!config.logsPlacementFilter().test(level, trunkPosition)) {
+                switch (config.treeLogFilterBehavior()) {
+                    case PIERCE:
+                        continue;
+                    case PASSTHROUGH:
+                        logPositions.remove(trunkPosition);
+                    case BLOCK:
+                        return true;
                 }
             }
         }

@@ -3,6 +3,7 @@ package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeFromStructureNBTConfig;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations.TreeLogFilterBehavior;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -244,11 +245,22 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
     }
 
     private static boolean validateLogPositions(Map<BlockPos, BlockState> logPositions, TreeFromStructureNBTConfig config, WorldGenLevel level) {
+        List<Runnable> post = new ArrayList<>();
         for (BlockPos trunkPosition : logPositions.keySet()) {
             if (!config.logsPlacementFilter().test(level, trunkPosition)) {
-                return true;
+                switch (config.treeLogFilterBehavior()) {
+                    case PIERCE:
+                        continue;
+                    case PASSTHROUGH:
+                        post.add(() -> logPositions.remove(trunkPosition));
+                        continue;
+                    case BLOCK:
+                        return true;
+                }
             }
         }
+
+        post.forEach(Runnable::run);
         return false;
     }
 
