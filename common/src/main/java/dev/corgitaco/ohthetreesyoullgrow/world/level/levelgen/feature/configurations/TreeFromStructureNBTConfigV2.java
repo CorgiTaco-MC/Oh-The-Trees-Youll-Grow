@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier canopyLocation,
@@ -22,6 +22,7 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
                                            Set<Block> logTarget, List<Block> leavesTarget,
                                            BlockPredicate growableOn, BlockPredicate leavesPlacementFilter,
                                            BlockPredicate logsPlacementFilter,
+                                           TreeLogFilterBehavior treeLogFilterBehavior,
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
                                            Map<Block, BlockStateProvider> replaceFromNBT,
@@ -42,6 +43,7 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
                     BlockPredicate.CODEC.fieldOf("can_grow_on_filter").forGetter(TreeFromStructureNBTConfigV2::growableOn),
                     BlockPredicate.CODEC.fieldOf("can_leaves_place_filter").forGetter(TreeFromStructureNBTConfigV2::leavesPlacementFilter),
                     BlockPredicate.CODEC.optionalFieldOf("can_logs_place_filter", BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfigV2::logsPlacementFilter),
+                    TreeLogFilterBehavior.CODEC.optionalFieldOf("tree_filter_behavior", TreeLogFilterBehavior.BLOCK).forGetter(TreeFromStructureNBTConfigV2::treeLogFilterBehavior),
                     Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfigV2::maxLogDepth),
                     TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
                     Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), BlockStateProvider.CODEC).fieldOf("replace_from_nbt").forGetter(TreeFromStructureNBTConfigV2::replaceFromNBT),
@@ -76,6 +78,7 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
         private BlockPredicate growableOn = BlockPredicate.replaceable();
         private BlockPredicate leavesPlacementFilter = BlockPredicate.replaceable();
         private BlockPredicate logsPlacementFilter = BlockPredicate.replaceable();
+        private TreeLogFilterBehavior treeLogFilterBehavior = TreeLogFilterBehavior.BLOCK;
         private int maxLogDepth = 5;
         private List<TreeDecorator> treeDecorators = new ArrayList<>();
         private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
@@ -107,11 +110,6 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
             return this;
         }
 
-        public Builder leavesProvider(BlockStateProvider leavesProvider) {
-            this.leavesProvider = List.of(leavesProvider);
-            return this;
-        }
-
         public Builder logTarget(Set<Block> logTarget) {
             this.logTarget = logTarget;
             return this;
@@ -134,6 +132,11 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
 
         public Builder logsPlacementFilter(BlockPredicate logsPlacementFilter) {
             this.logsPlacementFilter = logsPlacementFilter;
+            return this;
+        }
+
+        public Builder treeLogFilterBehavior(TreeLogFilterBehavior treeLogFilterBehavior) {
+            this.treeLogFilterBehavior = treeLogFilterBehavior;
             return this;
         }
 
@@ -196,6 +199,7 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
                     growableOn,
                     leavesPlacementFilter,
                     logsPlacementFilter,
+                    treeLogFilterBehavior,
                     maxLogDepth,
                     treeDecorators,
                     replaceFromNBT,
