@@ -1,3 +1,6 @@
+# 11.0.0
+* Update to 26.2
+
 # 10.1.0
 * Match 1.21.1 branch
 * Add the ability to define the log filter behavior. Filter options include: `PIERCE` - Destroy blocks in the filter. `PASSTHROUGH` - Tree will generate but skip blocks in filter. `BLOCK` - Tree will not generate if it meets a block in the filter.
