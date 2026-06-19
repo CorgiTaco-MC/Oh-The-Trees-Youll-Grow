@@ -78,7 +78,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
             level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.WEST), Blocks.REDSTONE_BLOCK.defaultBlockState(), 2);
             level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.EAST), Blocks.EMERALD_BLOCK.defaultBlockState(), 2);
             level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.NORTH), Blocks.DIAMOND_BLOCK.defaultBlockState(), 2);
-            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.SOUTH), Blocks.COPPER_BLOCK.defaultBlockState(), 2);
+            level.setBlock(rotateInDirectionAroundOrigin(blockPos, origin, Direction.SOUTH), Blocks.COPPER_BLOCK.waxed().exposed().defaultBlockState(), 2);
         }
 
 
@@ -88,7 +88,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
         StructureTemplate.Palette trunkBasePalette = placeSettings.getRandomPalette(basePalettes, origin);
         StructureTemplate.Palette randomCanopyPalette = placeSettings.getRandomPalette(canopyPalettes, origin);
 
-        List<StructureTemplate.StructureBlockInfo> center = trunkBasePalette.blocks(Blocks.WHITE_WOOL);
+        List<StructureTemplate.StructureBlockInfo> center = trunkBasePalette.blocks(Blocks.WOOL.white());
 
         if (center.isEmpty()) {
             throw new IllegalArgumentException("No trunk central position was specified for structure NBT palette %s. Trunk central position is specified with white wool.".formatted(config.baseLocation()));
@@ -102,7 +102,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
 
 
         List<StructureTemplate.StructureBlockInfo> logs = getStructureInfosInStructurePalletteFromBlockList(config.logTarget(), trunkBasePalette);
-        List<StructureTemplate.StructureBlockInfo> logBuilders = trunkBasePalette.blocks(Blocks.RED_WOOL);
+        List<StructureTemplate.StructureBlockInfo> logBuilders = trunkBasePalette.blocks(Blocks.WOOL.red());
         if (logBuilders.isEmpty()) {
             throw new UnsupportedOperationException(String.format("\"%s\" is missing log builders.", baseLocation));
         }
@@ -122,7 +122,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
         fillTrunkPositions(logProvider, leavesProvider, config, level, random, origin, placeSettings, trunkBasePalette, centerOffset, logs, logBuilders, leavePositions, logPositions, additionalPositions, maxTrunkBuildingDepth, direction);
 
         // Verify the canopy has connected with all trunk positions
-        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.YELLOW_WOOL), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, additionalPositions, trunkLength, direction)) {
+        if (!fillCanopyPositions(trunkBasePalette.blocks(Blocks.WOOL.yellow()), config, level, random, placeSettings, centerOffset, origin, randomCanopyPalette, leavePositions, logPositions, additionalPositions, trunkLength, direction)) {
             return false;
         }
 
@@ -316,7 +316,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
     public static boolean fillCanopyPositions(BlockStateProvider logProvider, List<BlockStateProvider> leavesProvider, TreeFromStructureNBTConfigV2 config, WorldGenLevel level, RandomSource randomSource, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette randomCanopyPalette, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> trunkPositions, Map<BlockPos, BlockState> additionalBlocks, int trunkLength, Direction treeGrowthDirection) {
         List<List<StructureTemplate.StructureBlockInfo>> leaves = getStructureInfosInStructurePalletteFromBlockListV2(config.leavesTarget(), randomCanopyPalette);
         List<StructureTemplate.StructureBlockInfo> canopyLogs = getStructureInfosInStructurePalletteFromBlockList(config.logTarget(), randomCanopyPalette);
-        List<StructureTemplate.StructureBlockInfo> canopyAnchor = randomCanopyPalette.blocks(Blocks.WHITE_WOOL);
+        List<StructureTemplate.StructureBlockInfo> canopyAnchor = randomCanopyPalette.blocks(Blocks.WOOL.white());
 
         if (canopyAnchor.isEmpty()) {
             throw new IllegalArgumentException("No canopy anchor was specified for structure NBT palette %s. Canopy anchor is specified with white wool.".formatted(config.canopyLocation()));
@@ -329,7 +329,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
         BlockPos canopyCenterOffset = structureBlockInfo.pos();
         canopyCenterOffset = new BlockPos(-canopyCenterOffset.getX(), trunkLength, -canopyCenterOffset.getZ());
 
-        List<StructureTemplate.StructureBlockInfo> trunkFillers = new ArrayList<>(randomCanopyPalette.blocks(Blocks.RED_WOOL));
+        List<StructureTemplate.StructureBlockInfo> trunkFillers = new ArrayList<>(randomCanopyPalette.blocks(Blocks.WOOL.red()));
 
         if (!intersectTrunk(logProvider, level, randomSource, origin, placeSettings, canopyCenterOffset, trunkFillers, trunkLength + 1, trunkPositions, treeGrowthDirection)) {
             return false;
