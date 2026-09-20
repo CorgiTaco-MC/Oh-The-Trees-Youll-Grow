@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
@@ -34,11 +35,11 @@ public class AttachedToLogsDecorator extends TreeDecorator {
     protected final float probability;
     protected final int exclusionRadiusXZ;
     protected final int exclusionRadiusY;
-    protected final BlockStateProvider blockProvider;
+    protected final Holder<BlockStateProvider> blockProvider;
     protected final int requiredEmptyBlocks;
     protected final List<Direction> directions;
 
-    public AttachedToLogsDecorator(float probability, int exclusionRadiusXZ, int exclusionRadiusY, BlockStateProvider blockProvider, int requiredEmptyBlocks, List<Direction> directions) {
+    public AttachedToLogsDecorator(float probability, int exclusionRadiusXZ, int exclusionRadiusY, Holder<BlockStateProvider> blockProvider, int requiredEmptyBlocks, List<Direction> directions) {
         this.probability = probability;
         this.exclusionRadiusXZ = exclusionRadiusXZ;
         this.exclusionRadiusY = exclusionRadiusY;
@@ -62,7 +63,7 @@ public class AttachedToLogsDecorator extends TreeDecorator {
                     set.add(blockpos4.immutable());
                 }
 
-                BlockState state = this.blockProvider.getState(pContext.level(), randomsource, relative);
+                BlockState state = this.blockProvider.value().getState(pContext.level(), randomsource, relative);
 
                 if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
                     state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, direction);

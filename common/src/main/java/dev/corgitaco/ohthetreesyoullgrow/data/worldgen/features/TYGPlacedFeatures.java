@@ -6,7 +6,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.CountPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
@@ -28,11 +28,11 @@ public class TYGPlacedFeatures {
     public static final ResourceKey<PlacedFeature> V2_TEST_MUSHROOM2 = createPlacedFeature("v1_test_mushroom2", TYGConfiguredFeatures.V1_TEST_MUSHROOM2, () -> CountPlacement.of(1));
 
     @SafeVarargs
-    private static ResourceKey<PlacedFeature> createPlacedFeature(String id, ResourceKey<ConfiguredFeature<?, ?>> feature, Supplier<PlacementModifier>... placementModifiers) {
+    private static ResourceKey<PlacedFeature> createPlacedFeature(String id, ResourceKey<Feature> feature, Supplier<PlacementModifier>... placementModifiers) {
         return createPlacedFeature(id, feature, () -> Arrays.stream(placementModifiers).map(Supplier::get).toList());
     }
 
-    private static ResourceKey<PlacedFeature> createPlacedFeature(String id, ResourceKey<ConfiguredFeature<?, ?>> feature, Supplier<List<PlacementModifier>> placementModifiers) {
+    private static ResourceKey<PlacedFeature> createPlacedFeature(String id, ResourceKey<Feature> feature, Supplier<List<PlacementModifier>> placementModifiers) {
         Identifier location = Constants.createLocation(id);
 
         ResourceKey<PlacedFeature> placedFeatureKey = ResourceKey.create(Registries.PLACED_FEATURE, location);
@@ -47,6 +47,6 @@ public class TYGPlacedFeatures {
 
     @FunctionalInterface
     public interface PlacedFeatureFactory {
-        PlacedFeature generate(HolderGetter<ConfiguredFeature<?, ?>> configuredFeatureHolderGetter);
+        PlacedFeature generate(HolderGetter<Feature> configuredFeatureHolderGetter);
     }
 }

@@ -1,3 +1,6 @@
+# 12.0.0
+* Update to 26.3
+
 # 11.0.1
 * Add a way to define a single leaves block state provider in the builder.
 

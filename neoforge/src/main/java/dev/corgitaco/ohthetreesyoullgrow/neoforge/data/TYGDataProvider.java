@@ -17,12 +17,12 @@ import java.util.Set;
 class TYGDataProvider {
 
     private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
-            .add(Registries.CONFIGURED_FEATURE, context -> TYGConfiguredFeatures.CONFIGURED_FEATURES_FACTORIES.forEach((configuredFeatureResourceKey, configuredFeatureFactory) -> context.register(configuredFeatureResourceKey, configuredFeatureFactory.generate(context))))
-            .add(Registries.PLACED_FEATURE, context -> TYGPlacedFeatures.PLACED_FEATURE_FACTORIES.forEach((placedFeatureResourceKey, placedFeatureFactory) -> context.register(placedFeatureResourceKey, placedFeatureFactory.generate(context.lookup(Registries.CONFIGURED_FEATURE)))));
+            .add(Registries.FEATURE, context -> TYGConfiguredFeatures.CONFIGURED_FEATURES_FACTORIES.forEach((configuredFeatureResourceKey, configuredFeatureFactory) -> context.register(configuredFeatureResourceKey, configuredFeatureFactory.generate(context))))
+            .add(Registries.PLACED_FEATURE, context -> TYGPlacedFeatures.PLACED_FEATURE_FACTORIES.forEach((placedFeatureResourceKey, placedFeatureFactory) -> context.register(placedFeatureResourceKey, placedFeatureFactory.generate(context.lookup(Registries.FEATURE)))));
 
     @SubscribeEvent
     private static void onGatherData(GatherDataEvent.Server event) {
         final DataGenerator gen = event.getGenerator();
-        gen.addProvider(event.includeDev(), new DatapackBuiltinEntriesProvider(gen.getPackOutput(), event.getLookupProvider(), BUILDER, Set.of(Constants.MOD_ID)));
+        gen.addProvider(event.includeDev(), DatapackBuiltinEntriesProvider.forWorldLayer(gen.getPackOutput(), "Oh The Trees You'll Grow worldgen", event.getWorldLookupProvider(), BUILDER, Set.of(Constants.MOD_ID)));
     }
 }

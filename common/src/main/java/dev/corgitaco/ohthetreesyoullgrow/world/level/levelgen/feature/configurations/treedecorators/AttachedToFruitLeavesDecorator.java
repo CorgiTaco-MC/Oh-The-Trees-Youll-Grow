@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -36,7 +37,7 @@ public class AttachedToFruitLeavesDecorator extends AttachedToLeavesDecorator {
 
     private final Block leavesBlock;
 
-    public AttachedToFruitLeavesDecorator(float probability, int exclusionRadiusXZ, int exclusionRadiusY, Block leavesBlock, BlockStateProvider blockProvider, int requiredEmptyBlocks, List<Direction> directions) {
+    public AttachedToFruitLeavesDecorator(float probability, int exclusionRadiusXZ, int exclusionRadiusY, Block leavesBlock, Holder<BlockStateProvider> blockProvider, int requiredEmptyBlocks, List<Direction> directions) {
         super(probability, exclusionRadiusXZ, exclusionRadiusY, blockProvider, requiredEmptyBlocks, directions);
         this.leavesBlock = leavesBlock;
     }
@@ -83,7 +84,7 @@ public class AttachedToFruitLeavesDecorator extends AttachedToLeavesDecorator {
                 positions.add(blockPos.immutable());
             }
 
-            context.setBlock(relativePos, this.blockProvider.getState(context.level(), random, relativePos));
+            context.setBlock(relativePos, this.blockProvider.value().getState(context.level(), random, relativePos));
         }
     }
 

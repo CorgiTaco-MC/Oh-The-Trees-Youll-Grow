@@ -1,15 +1,22 @@
 package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.TreeFromStructureNBTFeatureV2;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviders;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import org.jetbrains.annotations.Nullable;
@@ -18,20 +25,20 @@ import java.util.*;
 
 public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier canopyLocation,
                                            IntProvider height,
-                                           BlockStateProvider logProvider, List<BlockStateProvider> leavesProvider,
+                                           Holder<BlockStateProvider> logProvider, List<Holder<BlockStateProvider>> leavesProvider,
                                            Set<Block> logTarget, List<Block> leavesTarget,
                                            BlockPredicate growableOn, BlockPredicate leavesPlacementFilter,
                                            BlockPredicate logsPlacementFilter,
                                            TreeLogFilterBehavior treeLogFilterBehavior,
                                            int maxLogDepth,
                                            List<TreeDecorator> treeDecorators,
-                                           Map<Block, BlockStateProvider> replaceFromNBT,
+                                           Map<Block, Holder<BlockStateProvider>> replaceFromNBT,
                                            boolean randomRotation,
-                                           Orientation orientation) implements FeatureConfiguration {
+                                           Orientation orientation) implements Feature {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
 
-    public static final Codec<TreeFromStructureNBTConfigV2> CODEC = RecordCodecBuilder.create(builder ->
+    public static final MapCodec<TreeFromStructureNBTConfigV2> CODEC = RecordCodecBuilder.mapCodec(builder ->
             builder.group(
                     Identifier.CODEC.fieldOf("base_location").forGetter(TreeFromStructureNBTConfigV2::baseLocation),
                     Identifier.CODEC.fieldOf("canopy_location").forGetter(TreeFromStructureNBTConfigV2::canopyLocation),
@@ -52,6 +59,16 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
             ).apply(builder, TreeFromStructureNBTConfigV2::new)
     );
 
+    @Override
+    public MapCodec<TreeFromStructureNBTConfigV2> codec() {
+        return CODEC;
+    }
+
+    @Override
+    public boolean place(WorldGenLevel level, ChunkGenerator chunkGenerator, RandomSource random, BlockPos origin) {
+        return TreeFromStructureNBTFeatureV2.place(this, level, random, origin);
+    }
+
     public enum Orientation {
         STANDARD,
         UPSIDE_DOWN,
@@ -68,9 +85,9 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
         @Nullable
         private IntProvider height;
         @Nullable
-        private BlockStateProvider logProvider;
+        private Holder<BlockStateProvider> logProvider;
         @Nullable
-        private List<BlockStateProvider> leavesProvider;
+        private List<Holder<BlockStateProvider>> leavesProvider;
         @Nullable
         private Set<Block> logTarget;
         @Nullable
@@ -81,7 +98,7 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
         private TreeLogFilterBehavior treeLogFilterBehavior = TreeLogFilterBehavior.BLOCK;
         private int maxLogDepth = 5;
         private List<TreeDecorator> treeDecorators = new ArrayList<>();
-        private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
+        private Map<Block, Holder<BlockStateProvider>> replaceFromNBT = new HashMap<>();
         private boolean randomRotation = true;
         private Orientation orientation = Orientation.STANDARD;
 
@@ -101,16 +118,25 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
         }
 
         public Builder logProvider(BlockStateProvider logProvider) {
+            return logProvider(Holder.direct(logProvider));
+        }
+
+        public Builder logProvider(Holder<BlockStateProvider> logProvider) {
             this.logProvider = logProvider;
             return this;
         }
 
         public Builder leavesProvider(List<BlockStateProvider> leavesProvider) {
-            this.leavesProvider = leavesProvider;
+            this.leavesProvider = leavesProvider.stream().map(Holder::direct).toList();
             return this;
         }
 
         public Builder leavesProvider(BlockStateProvider leavesProvider) {
+            this.leavesProvider = List.of(Holder.direct(leavesProvider));
+            return this;
+        }
+
+        public Builder leavesProvider(Holder<BlockStateProvider> leavesProvider) {
             this.leavesProvider = List.of(leavesProvider);
             return this;
         }
@@ -156,7 +182,9 @@ public record TreeFromStructureNBTConfigV2(Identifier baseLocation, Identifier c
         }
 
         public Builder replaceFromNBT(Map<Block, BlockStateProvider> placeFromNBT) {
-            this.replaceFromNBT = placeFromNBT;
+            Map<Block, Holder<BlockStateProvider>> holders = new HashMap<>();
+            placeFromNBT.forEach((block, provider) -> holders.put(block, Holder.direct(provider)));
+            this.replaceFromNBT = holders;
             return this;
         }
 

@@ -1,0 +1,62 @@
+{
+  "type": "ohthetreesyoullgrow:tree_from_nbt_v2",
+  "base_location": "ohthetreesyoullgrow:features/trees/testv1/test_tree_trunk1",
+  "can_grow_on_filter": {
+    "type": "minecraft:any_of",
+    "predicates": [
+      {
+        "type": "minecraft:matching_block_tag",
+        "tag": "minecraft:dirt"
+      },
+      {
+        "type": "minecraft:matching_block_tag",
+        "tag": "minecraft:substrate_overworld"
+      }
+    ]
+  },
+  "can_leaves_place_filter": {
+    "type": "minecraft:replaceable"
+  },
+  "can_logs_place_filter": {
+    "type": "minecraft:replaceable"
+  },
+  "canopy_location": "ohthetreesyoullgrow:features/trees/testv1/test_tree_canopy1",
+  "decorators": [
+    {
+      "type": "minecraft:alter_ground",
+      "provider": {
+        "id": "minecraft:moss_block"
+      }
+    }
+  ],
+  "height": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 10,
+    "min_inclusive": 5
+  },
+  "leaves_provider": [
+    {
+      "id": "minecraft:acacia_leaves",
+      "properties": {
+        "distance": "7",
+        "persistent": "false",
+        "waterlogged": "false"
+      }
+    }
+  ],
+  "leaves_target": [
+    "minecraft:oak_leaves"
+  ],
+  "log_provider": {
+    "id": "minecraft:acacia_log",
+    "properties": {
+      "axis": "y"
+    }
+  },
+  "log_target": [
+    "minecraft:oak_log"
+  ],
+  "max_log_depth": 3,
+  "orientation": "SIDEWAYS",
+  "replace_from_nbt": {}
+}
