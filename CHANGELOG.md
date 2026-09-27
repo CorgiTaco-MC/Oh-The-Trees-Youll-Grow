@@ -1,8 +1,14 @@
+# 12.0.1
+* Fix saving random ticks to disk.
+* Let trees place regardless of rules by default.
+
+# 10.1.1
+* Add a way to define a single leaves block state provider in the builder.
+
 # 12.0.0
 * Update to 26.3
 
 # 11.0.1
-* Add a way to define a single leaves block state provider in the builder.
 
 # 11.0.0
 * Update to 26.2
