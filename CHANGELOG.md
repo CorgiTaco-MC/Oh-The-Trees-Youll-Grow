@@ -1,3 +1,6 @@
+# 3.0.3
+* Fix loading scheduled random ticks from disk.
+
 # 3.0.2
 * Fix placing tree decorator blocks.
 
