@@ -1,3 +1,6 @@
+# 2.0.3
+* Fix loading scheduled random ticks from disk.
+
 # 2.0.2
 * Place decorator blocks.
 
