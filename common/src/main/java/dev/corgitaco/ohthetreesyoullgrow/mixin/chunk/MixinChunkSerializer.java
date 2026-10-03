@@ -45,7 +45,7 @@ public class MixinChunkSerializer {
         if (tag.contains(Constants.MOD_ID)) {
             CompoundTag corgiLibTag = tag.getCompound(Constants.MOD_ID);
             if (corgiLibTag.contains("scheduled_random_ticks", Tag.TAG_LIST)) {
-                for (Tag scheduledTick : tag.getList("scheduled_random_ticks", Tag.TAG_COMPOUND)) {
+                for (Tag scheduledTick : corgiLibTag.getList("scheduled_random_ticks", Tag.TAG_INT_ARRAY)) {
                     int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
                     ((RandomTickScheduler) cir.getReturnValue()).getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
                 }
