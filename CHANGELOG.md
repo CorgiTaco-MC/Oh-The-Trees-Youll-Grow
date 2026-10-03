@@ -1,3 +1,6 @@
+# 4.0.2
+* Fix loading scheduled random ticks from disk.
+
 # 4.0.1
 * Rewrite tree growth logic to account for solid blocks and the surrounding environment prior to growing/placing.
 
