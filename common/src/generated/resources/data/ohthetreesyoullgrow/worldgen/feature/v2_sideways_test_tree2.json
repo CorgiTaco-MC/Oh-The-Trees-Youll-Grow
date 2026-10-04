@@ -36,6 +36,7 @@
     "max_inclusive": 10,
     "min_inclusive": 5
   },
+  "height_limit_behavior": "DEFAULT",
   "leaves_provider": [
     {
       "id": "minecraft:jungle_leaves",
@@ -58,6 +59,9 @@
   "log_target": [
     "minecraft:oak_log"
   ],
+  "max_log_depth": 5,
   "orientation": "SIDEWAYS",
-  "replace_from_nbt": {}
+  "random_rotation": true,
+  "replace_from_nbt": {},
+  "tree_filter_behavior": "BLOCK"
 }

@@ -34,6 +34,7 @@
     "max_inclusive": 10,
     "min_inclusive": 5
   },
+  "height_limit_behavior": "DEFAULT",
   "leaves_provider": [
     {
       "id": "minecraft:acacia_leaves",
@@ -57,5 +58,8 @@
     "minecraft:oak_log"
   ],
   "max_log_depth": 3,
-  "replace_from_nbt": {}
+  "orientation": "STANDARD",
+  "random_rotation": true,
+  "replace_from_nbt": {},
+  "tree_filter_behavior": "BLOCK"
 }

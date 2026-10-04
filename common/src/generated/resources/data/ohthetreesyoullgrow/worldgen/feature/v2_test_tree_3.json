@@ -21,11 +21,13 @@
     "type": "minecraft:replaceable"
   },
   "canopy_location": "ohthetreesyoullgrow:features/trees/testv1/test_tree_canopy1",
+  "decorators": [],
   "height": {
     "type": "minecraft:uniform",
     "max_inclusive": 25,
     "min_inclusive": 20
   },
+  "height_limit_behavior": "DEFAULT",
   "leaves_provider": [
     {
       "id": "minecraft:emerald_block"
@@ -41,5 +43,8 @@
     "minecraft:oak_log"
   ],
   "max_log_depth": 3,
-  "replace_from_nbt": {}
+  "orientation": "STANDARD",
+  "random_rotation": true,
+  "replace_from_nbt": {},
+  "tree_filter_behavior": "BLOCK"
 }
