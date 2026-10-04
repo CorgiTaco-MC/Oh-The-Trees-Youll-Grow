@@ -1,6 +1,7 @@
 package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -29,7 +30,8 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                          List<TreeDecorator> treeDecorators,
                                          Set<Block> placeFromNBT,
                                          boolean randomRotation,
-                                         Orientation orientation) implements FeatureConfiguration {
+                                         Orientation orientation,
+                                         HeightLimitBehavior heightLimitBehavior) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
 
@@ -44,14 +46,19 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                     BLOCK_SET_CODEC.fieldOf("leaves_target").forGetter(TreeFromStructureNBTConfig::leavesTarget),
                     BlockPredicate.CODEC.fieldOf("can_grow_on_filter").forGetter(TreeFromStructureNBTConfig::growableOn),
                     BlockPredicate.CODEC.fieldOf("can_leaves_place_filter").forGetter(TreeFromStructureNBTConfig::leavesPlacementFilter),
-                    BlockPredicate.CODEC.optionalFieldOf("can_logs_place_filter", BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfig::logsPlacementFilter),
-                    TreeLogFilterBehavior.CODEC.optionalFieldOf("tree_filter_behavior", TreeLogFilterBehavior.BLOCK).forGetter(TreeFromStructureNBTConfig::treeLogFilterBehavior),
-                    Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfig::maxLogDepth),
-                    TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfig::treeDecorators),
+                    BlockPredicate.CODEC.fieldOf("can_logs_place_filter").orElse(BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfig::logsPlacementFilter),
+                    TreeLogFilterBehavior.CODEC.fieldOf("tree_filter_behavior").orElse(TreeLogFilterBehavior.BLOCK).forGetter(TreeFromStructureNBTConfig::treeLogFilterBehavior),
+                    Codec.INT.fieldOf("max_log_depth").orElse(5).forGetter(TreeFromStructureNBTConfig::maxLogDepth),
+                    TreeDecorator.CODEC.listOf().fieldOf("decorators").orElse(new ArrayList<>()).forGetter(TreeFromStructureNBTConfig::treeDecorators),
                     BLOCK_SET_CODEC.fieldOf("place_from_nbt").forGetter(TreeFromStructureNBTConfig::placeFromNBT),
-                    Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(TreeFromStructureNBTConfig::randomRotation),
-                    Orientation.CODEC.optionalFieldOf("orientation", Orientation.STANDARD).forGetter(TreeFromStructureNBTConfig::orientation)
-            ).apply(builder, TreeFromStructureNBTConfig::new)
+                    Codec.BOOL.fieldOf("random_rotation").orElse(true).forGetter(TreeFromStructureNBTConfig::randomRotation),
+                    // RecordCodecBuilder supports at most 16 fields, so the remaining fields are paired together.
+                    Codec.mapPair(
+                            Orientation.CODEC.fieldOf("orientation").orElse(Orientation.STANDARD),
+                            HeightLimitBehavior.CODEC.fieldOf("height_limit_behavior").orElse(HeightLimitBehavior.DEFAULT)
+                    ).forGetter(config -> Pair.of(config.orientation(), config.heightLimitBehavior()))
+            ).apply(builder, (baseLocation, canopyLocation, height, logProvider, leavesProvider, logTarget, leavesTarget, growableOn, leavesPlacementFilter, logsPlacementFilter, treeLogFilterBehavior, maxLogDepth, treeDecorators, placeFromNBT, randomRotation, orientationAndHeightLimitBehavior) ->
+                    new TreeFromStructureNBTConfig(baseLocation, canopyLocation, height, logProvider, leavesProvider, logTarget, leavesTarget, growableOn, leavesPlacementFilter, logsPlacementFilter, treeLogFilterBehavior, maxLogDepth, treeDecorators, placeFromNBT, randomRotation, orientationAndHeightLimitBehavior.getFirst(), orientationAndHeightLimitBehavior.getSecond()))
     );
 
     @Deprecated(forRemoval = true, since = "Use Builder")
@@ -59,7 +66,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Collection<Block> logTarget,
                                       List<Block> leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder")
@@ -67,7 +74,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder")
@@ -75,7 +82,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, ImmutableList.of(), Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, ImmutableList.of(), Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder")
@@ -91,7 +98,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Collection<Block> logTarget,
                                       List<Block> leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators, boolean isSapling) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder class")
@@ -99,7 +106,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators, boolean isSapling) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, treeDecorators, Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder class")
@@ -107,7 +114,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth, boolean isSapling) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, ImmutableList.of(), Set.of(), true, Orientation.STANDARD);
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), BlockPredicate.replaceable(), TreeLogFilterBehavior.BLOCK, maxLogDepth, ImmutableList.of(), Set.of(), true, Orientation.STANDARD, HeightLimitBehavior.DEFAULT);
     }
 
     @Deprecated(forRemoval = true, since = "Use Builder class")
@@ -150,6 +157,7 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
         private Set<Block> placeFromNBT = new HashSet<>();
         private boolean randomRotation = true;
         private Orientation orientation = Orientation.STANDARD;
+        private HeightLimitBehavior heightLimitBehavior = HeightLimitBehavior.DEFAULT;
 
         public Builder baseLocation(ResourceLocation baseLocation) {
             this.baseLocation = baseLocation;
@@ -232,6 +240,11 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
         }
 
 
+        public Builder heightLimitBehavior(HeightLimitBehavior heightLimitBehavior) {
+            this.heightLimitBehavior = heightLimitBehavior;
+            return this;
+        }
+
         public TreeFromStructureNBTConfig build() {
             if (baseLocation == null) {
                 throw new IllegalStateException("Base location cannot be null");
@@ -271,7 +284,8 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                     treeDecorators,
                     placeFromNBT,
                     randomRotation,
-                    orientation
+                    orientation,
+                    heightLimitBehavior
             );
         }
     }
