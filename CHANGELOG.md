@@ -1,3 +1,6 @@
+# 1.7.2
+* Add Height Limit Behavior Config for Trees. This will resolve an issue where trees grow above the ceiling of the nether.
+
 # 1.7.1
 * Fix loading scheduled random ticks from disk.
 
