@@ -1,5 +1,6 @@
 package dev.corgitaco.ohthetreesyoullgrow.world.level.levelgen.feature.configurations;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -27,7 +28,8 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                                            List<TreeDecorator> treeDecorators,
                                            Map<Block, BlockStateProvider> replaceFromNBT,
                                            boolean randomRotation,
-                                           Orientation orientation) implements FeatureConfiguration {
+                                           Orientation orientation,
+                                           HeightLimitBehavior heightLimitBehavior) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
 
@@ -42,14 +44,19 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     BuiltInRegistries.BLOCK.byNameCodec().listOf().fieldOf("leaves_target").forGetter(TreeFromStructureNBTConfigV2::leavesTarget),
                     BlockPredicate.CODEC.fieldOf("can_grow_on_filter").forGetter(TreeFromStructureNBTConfigV2::growableOn),
                     BlockPredicate.CODEC.fieldOf("can_leaves_place_filter").forGetter(TreeFromStructureNBTConfigV2::leavesPlacementFilter),
-                    BlockPredicate.CODEC.optionalFieldOf("can_logs_place_filter", BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfigV2::logsPlacementFilter),
-                    TreeLogFilterBehavior.CODEC.optionalFieldOf("tree_filter_behavior", TreeLogFilterBehavior.BLOCK).forGetter(TreeFromStructureNBTConfigV2::treeLogFilterBehavior),
-                    Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfigV2::maxLogDepth),
-                    TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
+                    BlockPredicate.CODEC.fieldOf("can_logs_place_filter").orElse(BlockPredicate.replaceable()).forGetter(TreeFromStructureNBTConfigV2::logsPlacementFilter),
+                    TreeLogFilterBehavior.CODEC.fieldOf("tree_filter_behavior").orElse(TreeLogFilterBehavior.BLOCK).forGetter(TreeFromStructureNBTConfigV2::treeLogFilterBehavior),
+                    Codec.INT.fieldOf("max_log_depth").orElse(5).forGetter(TreeFromStructureNBTConfigV2::maxLogDepth),
+                    TreeDecorator.CODEC.listOf().fieldOf("decorators").orElse(new ArrayList<>()).forGetter(TreeFromStructureNBTConfigV2::treeDecorators),
                     Codec.unboundedMap(BuiltInRegistries.BLOCK.byNameCodec(), BlockStateProvider.CODEC).fieldOf("replace_from_nbt").forGetter(TreeFromStructureNBTConfigV2::replaceFromNBT),
-                    Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(TreeFromStructureNBTConfigV2::randomRotation),
-                    Orientation.CODEC.optionalFieldOf("orientation", Orientation.STANDARD).forGetter(TreeFromStructureNBTConfigV2::orientation)
-            ).apply(builder, TreeFromStructureNBTConfigV2::new)
+                    Codec.BOOL.fieldOf("random_rotation").orElse(true).forGetter(TreeFromStructureNBTConfigV2::randomRotation),
+                    // RecordCodecBuilder supports at most 16 fields, so the remaining fields are paired together.
+                    Codec.mapPair(
+                            Orientation.CODEC.fieldOf("orientation").orElse(Orientation.STANDARD),
+                            HeightLimitBehavior.CODEC.fieldOf("height_limit_behavior").orElse(HeightLimitBehavior.DEFAULT)
+                    ).forGetter(config -> Pair.of(config.orientation(), config.heightLimitBehavior()))
+            ).apply(builder, (baseLocation, canopyLocation, height, logProvider, leavesProvider, logTarget, leavesTarget, growableOn, leavesPlacementFilter, logsPlacementFilter, treeLogFilterBehavior, maxLogDepth, treeDecorators, replaceFromNBT, randomRotation, orientationAndHeightLimitBehavior) ->
+                    new TreeFromStructureNBTConfigV2(baseLocation, canopyLocation, height, logProvider, leavesProvider, logTarget, leavesTarget, growableOn, leavesPlacementFilter, logsPlacementFilter, treeLogFilterBehavior, maxLogDepth, treeDecorators, replaceFromNBT, randomRotation, orientationAndHeightLimitBehavior.getFirst(), orientationAndHeightLimitBehavior.getSecond()))
     );
 
     public enum Orientation {
@@ -84,6 +91,7 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
         private Map<Block, BlockStateProvider> replaceFromNBT = new HashMap<>();
         private boolean randomRotation = true;
         private Orientation orientation = Orientation.STANDARD;
+        private HeightLimitBehavior heightLimitBehavior = HeightLimitBehavior.DEFAULT;
 
         public Builder baseLocation(ResourceLocation baseLocation) {
             this.baseLocation = baseLocation;
@@ -165,6 +173,11 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
             return this;
         }
 
+        public Builder heightLimitBehavior(HeightLimitBehavior heightLimitBehavior) {
+            this.heightLimitBehavior = heightLimitBehavior;
+            return this;
+        }
+
         public TreeFromStructureNBTConfigV2 build() {
             if (baseLocation == null) {
                 throw new IllegalStateException("Base location cannot be null");
@@ -204,7 +217,8 @@ public record TreeFromStructureNBTConfigV2(ResourceLocation baseLocation, Resour
                     treeDecorators,
                     replaceFromNBT,
                     randomRotation,
-                    orientation
+                    orientation,
+                    heightLimitBehavior
             );
         }
     }
