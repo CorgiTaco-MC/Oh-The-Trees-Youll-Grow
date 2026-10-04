@@ -1,3 +1,6 @@
+# 6.1.1
+* Add Height Limit Behavior Config for Trees. This will resolve an issue where trees grow above the ceiling of the nether.
+
 # 6.1.0
 * Add sideways and upside down tree config choices.
 * Fix canopy and trunk additional block placements.
