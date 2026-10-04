@@ -29,6 +29,7 @@
       "max_inclusive": 10,
       "min_inclusive": 5
     },
+    "height_limit_behavior": "DEFAULT",
     "leaves_provider": [
       {
         "type": "minecraft:simple_state_provider",
@@ -59,6 +60,8 @@
     ],
     "max_log_depth": 3,
     "orientation": "SIDEWAYS",
-    "replace_from_nbt": {}
+    "random_rotation": true,
+    "replace_from_nbt": {},
+    "tree_filter_behavior": "BLOCK"
   }
 }
