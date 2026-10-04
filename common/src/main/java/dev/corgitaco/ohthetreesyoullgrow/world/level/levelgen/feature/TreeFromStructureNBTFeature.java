@@ -11,6 +11,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -119,6 +120,14 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             }
         }
 
+        Map<BlockPos, BlockState> additionalPositions = new HashMap<>();
+        collectAdditional(config, origin, placeSettings, trunkBasePalette, centerOffset, additionalPositions);
+        collectAdditional(config, origin, placeSettings, randomCanopyPalette, centerOffset, additionalPositions);
+
+        if (testHeightLimit(config, level, trunkPositions, leavePositions, additionalPositions)) {
+            return false; // Exit because the tree is outside the height limit.
+        }
+
         for (Map.Entry<BlockPos, BlockState> entry : trunkPositions.entrySet()) {
             BlockPos trunkPosition = entry.getKey();
             BlockState state = entry.getValue();
@@ -151,13 +160,63 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
 
         leavesPostApply.forEach(Runnable::run);
 
-        placeAdditional(config, level, origin, placeSettings, trunkBasePalette, centerOffset);
-        placeAdditional(config, level, origin, placeSettings, randomCanopyPalette, centerOffset);
+        for (Map.Entry<BlockPos, BlockState> entry : additionalPositions.entrySet()) {
+            BlockPos pos = entry.getKey();
+            level.setBlock(pos, entry.getValue(), 2);
+            ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+        }
 
         Set<BlockPos> decorationPositions = new HashSet<>();
         placeTreeDecorations(config.treeDecorators(), level, random, leavePositions.keySet(), leavePositions.keySet(), decorationPositions);
 
         return true;
+    }
+
+    // Return true if generation of the tree should be blocked.
+    private static boolean testHeightLimit(TreeFromStructureNBTConfig config, WorldGenLevel level, Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions) {
+        ChunkGenerator generator = level.getLevel().getChunkSource().getGenerator();
+        int chunkGeneratorMaxY = generator.getGenDepth() + generator.getMinY();
+        int maxY = level.getMaxBuildHeight() - 1;
+
+        switch (config.heightLimitBehavior()) {
+            case DEFAULT -> {
+                if (testY(logPositions, maxY) || testY(leavePositions, maxY) || testY(additionalPositions, maxY)) {
+                    return true;
+                }
+            }
+            case CHUNK_GENERATOR_HEIGHT_BLOCK -> {
+                if (testY(logPositions, chunkGeneratorMaxY) || testY(leavePositions, chunkGeneratorMaxY) || testY(additionalPositions, chunkGeneratorMaxY))
+                    return true;
+            }
+            case WORLD_HEIGHT_PASS_REMOVE_BLOCKS -> {
+                logPositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
+                leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
+                additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
+            }
+            case CHUNK_GENERATOR_HEIGHT_PASS_REMOVE_BLOCKS -> {
+                logPositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
+                leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
+                additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
+            }
+        }
+        return false;
+    }
+
+    private static boolean testY(Map<BlockPos, BlockState> positions, int yLimit) {
+        for (BlockPos blockPos : positions.keySet()) {
+            if (blockPos.getY() > yLimit) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void collectAdditional(TreeFromStructureNBTConfig config, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette palette, BlockPos centerOffset, Map<BlockPos, BlockState> additionalPositions) {
+        List<StructureTemplate.StructureBlockInfo> additionalBlocks = getStructureInfosInStructurePalletteFromBlockList(config.placeFromNBT(), palette);
+        for (StructureTemplate.StructureBlockInfo additionalBlock : additionalBlocks) {
+            BlockPos pos = getModifiedPos(placeSettings, additionalBlock, centerOffset, origin);
+            additionalPositions.put(pos.immutable(), additionalBlock.state());
+        }
     }
 
     public static void placeAdditional(TreeFromStructureNBTConfig config, WorldGenLevel level, BlockPos origin, StructurePlaceSettings placeSettings, StructureTemplate.Palette palette, BlockPos centerOffset) {

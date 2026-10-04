@@ -24,7 +24,8 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                          BlockPredicate growableOn, BlockPredicate leavesPlacementFilter,
                                          int maxLogDepth,
                                          List<TreeDecorator> treeDecorators,
-                                         Set<Block> placeFromNBT) implements FeatureConfiguration {
+                                         Set<Block> placeFromNBT,
+                                         HeightLimitBehavior heightLimitBehavior) implements FeatureConfiguration {
 
     public static final Codec<Set<Block>> BLOCK_SET_CODEC = Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).xmap(ObjectOpenHashSet::new, ArrayList::new);
 
@@ -41,7 +42,8 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                     BlockPredicate.CODEC.fieldOf("can_leaves_place_filter").forGetter(TreeFromStructureNBTConfig::leavesPlacementFilter),
                     Codec.INT.optionalFieldOf("max_log_depth", 5).forGetter(TreeFromStructureNBTConfig::maxLogDepth),
                     TreeDecorator.CODEC.listOf().optionalFieldOf("decorators", new ArrayList<>()).forGetter(TreeFromStructureNBTConfig::treeDecorators),
-                    BLOCK_SET_CODEC.fieldOf("place_from_nbt").forGetter(TreeFromStructureNBTConfig::placeFromNBT)
+                    BLOCK_SET_CODEC.fieldOf("place_from_nbt").forGetter(TreeFromStructureNBTConfig::placeFromNBT),
+                    HeightLimitBehavior.CODEC.fieldOf("height_limit_behavior").orElse(HeightLimitBehavior.DEFAULT).forGetter(TreeFromStructureNBTConfig::heightLimitBehavior)
             ).apply(builder, TreeFromStructureNBTConfig::new)
     );
 
@@ -49,21 +51,21 @@ public record TreeFromStructureNBTConfig(ResourceLocation baseLocation, Resource
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Collection<Block> logTarget,
                                       List<Block> leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, treeDecorators, Set.of());
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, new ObjectOpenHashSet<>(logTarget), new ObjectOpenHashSet<>(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, treeDecorators, Set.of(), HeightLimitBehavior.DEFAULT);
     }
 
     public TreeFromStructureNBTConfig(ResourceLocation baseLocation, ResourceLocation canopyLocation,
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth, List<TreeDecorator> treeDecorators) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, treeDecorators, Set.of());
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, treeDecorators, Set.of(), HeightLimitBehavior.DEFAULT);
     }
 
     public TreeFromStructureNBTConfig(ResourceLocation baseLocation, ResourceLocation canopyLocation,
                                       IntProvider height, BlockStateProvider logProvider,
                                       BlockStateProvider leavesProvider, Block logTarget,
                                       Block leavesTarget, TagKey<Block> growableOn, int maxLogDepth) {
-        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, ImmutableList.of(), Set.of());
+        this(baseLocation, canopyLocation, height, logProvider, leavesProvider, Collections.singleton(logTarget), Collections.singleton(leavesTarget), BlockPredicate.matchesTag(growableOn), BlockPredicate.replaceable(), maxLogDepth, ImmutableList.of(), Set.of(), HeightLimitBehavior.DEFAULT);
     }
 
     public TreeFromStructureNBTConfig(ResourceLocation baseLocation, ResourceLocation canopyLocation,
