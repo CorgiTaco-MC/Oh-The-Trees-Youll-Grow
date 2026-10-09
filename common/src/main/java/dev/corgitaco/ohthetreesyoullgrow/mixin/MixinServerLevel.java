@@ -27,7 +27,7 @@ public abstract class MixinServerLevel extends Level {
 
     @Inject(method = "tickChunk", at = @At("HEAD"))
     private void tickScheduledRandomTicks(LevelChunk chunk, int randomTickSpeed, CallbackInfo ci) {
-        ((RandomTickScheduler) chunk).getScheduledRandomTicks().removeIf(scheduledPos -> {
+        ((RandomTickScheduler) chunk).ohthetreesyoullgrow$getScheduledRandomTicks().removeIf(scheduledPos -> {
             chunk.getBlockState(scheduledPos).randomTick((ServerLevel) (Object) this, scheduledPos, this.random);
             return true;
         });
