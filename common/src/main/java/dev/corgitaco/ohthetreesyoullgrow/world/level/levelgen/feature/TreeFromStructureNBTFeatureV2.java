@@ -308,7 +308,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                 BlockPos pos = getModifiedPos(placeSettings, additionalBlock, centerOffset, origin);
                 pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
                 additionalBlocks.put(pos.immutable(), getTransformedState(pos, newBlock.getState(randomSource, pos), additionalBlock.state(), placeSettings.getRotation(), level, treeGrowthDirection));
-                ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+                ((RandomTickScheduler) level.getChunk(pos)).ohthetreesyoullgrow$scheduleRandomTick(pos.immutable());
             }
         });
     }
@@ -345,7 +345,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                 BlockPos pos = getModifiedPos(placeSettings, additionalBlock, finalCanopyCenterOffset, origin);
                 pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
                 additionalBlocks.put(pos.immutable(), getTransformedState(pos, newBlock.getState(randomSource, pos), additionalBlock.state(), placeSettings.getRotation(), level, treeGrowthDirection));
-                ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+                ((RandomTickScheduler) level.getChunk(pos)).ohthetreesyoullgrow$scheduleRandomTick(pos.immutable());
             }
         });
 
@@ -394,7 +394,7 @@ public class TreeFromStructureNBTFeatureV2 extends Feature<TreeFromStructureNBTC
                     trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
                     mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
-                    ((RandomTickScheduler) level.getChunk(mutableBlockPos)).scheduleRandomTick(mutableBlockPos.immutable());
+                    ((RandomTickScheduler) level.getChunk(mutableBlockPos)).ohthetreesyoullgrow$scheduleRandomTick(mutableBlockPos.immutable());
                     break;
                 }
             }
