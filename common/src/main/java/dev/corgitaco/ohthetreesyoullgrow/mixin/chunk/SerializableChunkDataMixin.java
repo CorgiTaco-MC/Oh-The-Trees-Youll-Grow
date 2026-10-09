@@ -31,7 +31,7 @@ public class SerializableChunkDataMixin {
         SerializableChunkData returnValue = cir.getReturnValue();
         if (returnValue != null) {
             CompoundTag compoundTag = returnValue.structureData();
-            List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).getScheduledRandomTicks();
+            List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).ohthetreesyoullgrow$getScheduledRandomTicks();
 
             if (!scheduledRandomTicks.isEmpty()) {
                 CompoundTag corgiLibTag = new CompoundTag();
@@ -40,7 +40,7 @@ public class SerializableChunkDataMixin {
                 for (BlockPos scheduledRandomTick : scheduledRandomTicks) {
                     listTag.add(new IntArrayTag(new int[]{scheduledRandomTick.getX(), scheduledRandomTick.getY(), scheduledRandomTick.getZ()}));
                 }
-                corgiLibTag.put("scheduled_random_ticks", listTag);
+                corgiLibTag.put("scheduled_random_ticks_v2", listTag);
 
                 compoundTag.put(Constants.MOD_ID, corgiLibTag);
             }
@@ -51,10 +51,10 @@ public class SerializableChunkDataMixin {
     private void readScheduledRandomTicks(ServerLevel level, PoiManager poiManager, RegionStorageInfo regionStorageInfo, ChunkPos pos, CallbackInfoReturnable<ProtoChunk> cir) {
         if (this.structureData.contains(Constants.MOD_ID)) {
             CompoundTag corgiLibTag = this.structureData.getCompoundOrEmpty(Constants.MOD_ID);
-            if (corgiLibTag.contains("scheduled_random_ticks")) {
-                for (Tag scheduledTick : corgiLibTag.getListOrEmpty("scheduled_random_ticks")) {
+            if (corgiLibTag.contains("scheduled_random_ticks_v2")) {
+                for (Tag scheduledTick : corgiLibTag.getListOrEmpty("scheduled_random_ticks_v2")) {
                     int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
-                    ((RandomTickScheduler) cir.getReturnValue()).getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
+                    ((RandomTickScheduler) cir.getReturnValue()).ohthetreesyoullgrow$getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
                 }
             }
             this.structureData.remove(Constants.MOD_ID);
