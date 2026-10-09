@@ -1,3 +1,6 @@
+# 8.1.1
+* fix a memory leak caused by improper scheduled tick storage and loading
+
 # 8.1.0
 * Add sideways and upside down tree config choices.
 * Fix canopy and trunk additional block placements.
