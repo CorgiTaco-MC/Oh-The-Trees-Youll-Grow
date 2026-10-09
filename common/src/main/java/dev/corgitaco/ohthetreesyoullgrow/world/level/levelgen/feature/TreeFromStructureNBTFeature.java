@@ -355,7 +355,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             BlockPos pos = getModifiedPos(placeSettings, additionalBlock, centerOffset, origin);
             pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
             additionalBlocks.put(pos.immutable(), additionalBlock.state());
-            ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+            ((RandomTickScheduler) level.getChunk(pos)).ohthetreesyoullgrow$scheduleRandomTick(pos.immutable());
         }
     }
 
@@ -388,7 +388,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
             BlockPos pos = getModifiedPos(placeSettings, additionalBlock, canopyCenterOffset, origin);
             pos = rotateInDirectionAroundOrigin(pos, origin, treeGrowthDirection);
             additionalBlocks.put(pos.immutable(), additionalBlock.state());
-            ((RandomTickScheduler) level.getChunk(pos)).scheduleRandomTick(pos.immutable());
+            ((RandomTickScheduler) level.getChunk(pos)).ohthetreesyoullgrow$scheduleRandomTick(pos.immutable());
         }
         return true;
     }
@@ -432,7 +432,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                     trunkPositions.put(mutableBlockPos.immutable(), getTransformedState(mutableBlockPos, logProvider.getState(random, mutableBlockPos), logBuilder.state(), placeSettings.getRotation(), level, treeGrowthDirection));
                     mutableBlockPos.move(treeGrowthDirection.getOpposite());
                 } else {
-                    ((RandomTickScheduler) level.getChunk(mutableBlockPos)).scheduleRandomTick(mutableBlockPos.immutable());
+                    ((RandomTickScheduler) level.getChunk(mutableBlockPos)).ohthetreesyoullgrow$scheduleRandomTick(mutableBlockPos.immutable());
                     break;
                 }
             }
