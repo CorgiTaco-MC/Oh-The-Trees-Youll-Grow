@@ -1,3 +1,6 @@
+# 11.0.4
+* fix a memory leak caused by improper scheduled tick storage and loading
+
 # 11.0.3
 * Add Height Limit Behavior Config for Trees. This will resolve an issue where trees grow above the ceiling of the nether.
 
