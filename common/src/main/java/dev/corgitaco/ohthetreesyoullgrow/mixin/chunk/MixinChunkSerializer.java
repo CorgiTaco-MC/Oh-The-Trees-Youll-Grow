@@ -34,7 +34,7 @@ public class MixinChunkSerializer {
 
     @Inject(method = "copyOf", at = @At(value = "RETURN"))
     private static void writeScheduledRandomTicks(ServerLevel level, ChunkAccess chunk, CallbackInfoReturnable<SerializableChunkData> cir) {
-        List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).getScheduledRandomTicks();
+        List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).ohthetreesyoullgrow$getScheduledRandomTicks();
 
         if (!scheduledRandomTicks.isEmpty()) {
             CompoundTag corgiLibTag = new CompoundTag();
@@ -43,7 +43,7 @@ public class MixinChunkSerializer {
             for (BlockPos scheduledRandomTick : scheduledRandomTicks) {
                 listTag.add(new IntArrayTag(new int[]{scheduledRandomTick.getX(), scheduledRandomTick.getY(), scheduledRandomTick.getZ()}));
             }
-            corgiLibTag.put("scheduled_random_ticks", listTag);
+            corgiLibTag.put("scheduled_random_ticks_v2", listTag);
 
             cir.getReturnValue().structureData().put(Constants.MOD_ID, corgiLibTag);
         }
@@ -57,12 +57,12 @@ public class MixinChunkSerializer {
             Optional<CompoundTag> corgiLibTagOptional = tag.getCompound(Constants.MOD_ID);
             if (corgiLibTagOptional.isPresent()) {
                 CompoundTag corgiLibTag = corgiLibTagOptional.get();
-                if (corgiLibTag.contains("scheduled_random_ticks")) {
-                    Optional<ListTag> listTagOptional = corgiLibTag.getList("scheduled_random_ticks");
+                if (corgiLibTag.contains("scheduled_random_ticks_v2")) {
+                    Optional<ListTag> listTagOptional = corgiLibTag.getList("scheduled_random_ticks_v2");
                     if (listTagOptional.isPresent()) {
                         for (Tag scheduledTick : listTagOptional.get()) {
                             int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
-                            ((RandomTickScheduler) cir.getReturnValue()).getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
+                            ((RandomTickScheduler) cir.getReturnValue()).ohthetreesyoullgrow$getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
                         }
                     }
                 }
