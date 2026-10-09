@@ -18,12 +18,12 @@ public class MixinChunkAccess implements RandomTickScheduler {
 
 
     @Override
-    public void scheduleRandomTick(BlockPos pos) {
+    public void ohthetreesyoullgrow$scheduleRandomTick(BlockPos pos) {
         scheduledRandomTick.add(pos.immutable());
     }
 
     @Override
-    public List<BlockPos> getScheduledRandomTicks() {
+    public List<BlockPos> ohthetreesyoullgrow$getScheduledRandomTicks() {
         return scheduledRandomTick;
     }
 }

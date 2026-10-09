@@ -33,7 +33,7 @@ public class MixinChunkSerializer {
 
     @Inject(method = "copyOf", at = @At(value = "RETURN"))
     private static void writeScheduledRandomTicks(ServerLevel level, ChunkAccess chunk, CallbackInfoReturnable<SerializableChunkData> cir) {
-        List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).getScheduledRandomTicks();
+        List<BlockPos> scheduledRandomTicks = ((RandomTickScheduler) chunk).ohthetreesyoullgrow$getScheduledRandomTicks();
 
         if (!scheduledRandomTicks.isEmpty()) {
             CompoundTag corgiLibTag = new CompoundTag();
@@ -42,7 +42,7 @@ public class MixinChunkSerializer {
             for (BlockPos scheduledRandomTick : scheduledRandomTicks) {
                 listTag.add(new IntArrayTag(new int[]{scheduledRandomTick.getX(), scheduledRandomTick.getY(), scheduledRandomTick.getZ()}));
             }
-            corgiLibTag.put("scheduled_random_ticks", listTag);
+            corgiLibTag.put("scheduled_random_ticks_v2", listTag);
 
             cir.getReturnValue().structureData().put(Constants.MOD_ID, corgiLibTag);
         }
@@ -54,10 +54,10 @@ public class MixinChunkSerializer {
         CompoundTag tag = this.structureData;
         if (tag.contains(Constants.MOD_ID)) {
             CompoundTag corgiLibTag = tag.getCompound(Constants.MOD_ID).orElseThrow();
-            if (corgiLibTag.contains("scheduled_random_ticks")) {
-                for (Tag scheduledTick : tag.getList("scheduled_random_ticks").orElseThrow()) {
+            if (corgiLibTag.contains("scheduled_random_ticks_v2")) {
+                for (Tag scheduledTick : tag.getList("scheduled_random_ticks_v2").orElseThrow()) {
                     int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
-                    ((RandomTickScheduler) cir.getReturnValue()).getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
+                    ((RandomTickScheduler) cir.getReturnValue()).ohthetreesyoullgrow$getScheduledRandomTicks().add(new BlockPos(intArrayTag[0], intArrayTag[1], intArrayTag[2]));
                 }
             }
         }
