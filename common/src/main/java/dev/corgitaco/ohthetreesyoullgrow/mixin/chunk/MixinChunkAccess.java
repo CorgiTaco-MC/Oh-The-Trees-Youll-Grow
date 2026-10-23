@@ -14,16 +14,16 @@ import java.util.List;
 public class MixinChunkAccess implements RandomTickScheduler {
 
     @Unique
-    private final List<BlockPos> scheduledRandomTick = new ArrayList<>();
+    private final List<BlockPos> ohthetreesyoullgrow$scheduledRandomTicks = new ArrayList<>();
 
 
     @Override
     public void ohthetreesyoullgrow$scheduleRandomTick(BlockPos pos) {
-        scheduledRandomTick.add(pos.immutable());
+        ohthetreesyoullgrow$scheduledRandomTicks.add(pos.immutable());
     }
 
     @Override
     public List<BlockPos> ohthetreesyoullgrow$getScheduledRandomTicks() {
-        return scheduledRandomTick;
+        return ohthetreesyoullgrow$scheduledRandomTicks;
     }
 }
