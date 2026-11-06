@@ -149,7 +149,7 @@ public class TreeFromStructureNBTFeatureV2 {
 
         switch (config.heightLimitBehavior()) {
             case DEFAULT -> {
-                if (testY(logPositions, level.getMaxY()) || testY(leavePositions, level.getMaxY()) || testY(additionalPositions, level.getMaxY())) {
+                if (testY(logPositions, level.getMaxY() + 1) || testY(leavePositions, level.getMaxY() + 1) || testY(additionalPositions, level.getMaxY() + 1)) {
                     return true;
                 }
             }
@@ -158,7 +158,7 @@ public class TreeFromStructureNBTFeatureV2 {
                     return true;
             }
             case WORLD_HEIGHT_PASS_REMOVE_BLOCKS -> {
-                removeBlocksAboveY(logPositions, leavePositions, additionalPositions, level.getMaxY());
+                removeBlocksAboveY(logPositions, leavePositions, additionalPositions, level.getMaxY() + 1);
             }
             case CHUNK_GENERATOR_HEIGHT_PASS_REMOVE_BLOCKS -> {
                 removeBlocksAboveY(logPositions, leavePositions, additionalPositions, chunkGeneratorMaxY);
@@ -167,10 +167,10 @@ public class TreeFromStructureNBTFeatureV2 {
         return false;
     }
 
-    private static void removeBlocksAboveY(Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions, int chunkGeneratorMaxY) {
-        logPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
-        leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
-        additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
+    private static void removeBlocksAboveY(Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions, int yLimit) {
+        logPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
+        leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
+        additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
     }
 
     private static boolean testY(Map<BlockPos, BlockState> positions, int yLimit) {
