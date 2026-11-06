@@ -170,22 +170,24 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
                     return true;
             }
             case WORLD_HEIGHT_PASS_REMOVE_BLOCKS -> {
-                logPositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
-                leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
-                additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() > maxY);
+                removeBlocksAboveY(logPositions, leavePositions, additionalPositions, maxY);
             }
             case CHUNK_GENERATOR_HEIGHT_PASS_REMOVE_BLOCKS -> {
-                logPositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
-                leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
-                additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() > chunkGeneratorMaxY);
+                removeBlocksAboveY(logPositions, leavePositions, additionalPositions, chunkGeneratorMaxY);
             }
         }
         return false;
     }
 
+    private static void removeBlocksAboveY(Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions, int chunkGeneratorMaxY) {
+        logPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
+        leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
+        additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
+    }
+
     private static boolean testY(Map<BlockPos, BlockState> positions, int yLimit) {
         for (BlockPos blockPos : positions.keySet()) {
-            if (blockPos.getY() > yLimit) {
+            if (blockPos.getY() >= yLimit) {
                 return true;
             }
         }
