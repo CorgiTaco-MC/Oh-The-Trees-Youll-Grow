@@ -1,3 +1,7 @@
+# 1.7.4
+* Clear oversized random tick tags.
+* Fix blocks generating above the nether roof.
+
 # 1.7.3
 * fix a memory leak caused by improper scheduled tick storage and loading
 
