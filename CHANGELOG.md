@@ -1,3 +1,7 @@
+# 11.0.5
+* Clear oversized random tick tags.
+* Fix blocks generating above the nether roof.
+
 # 11.0.4
 * fix a memory leak caused by improper scheduled tick storage and loading
 
