@@ -1,6 +1,8 @@
 package dev.corgitaco.ohthetreesyoullgrow.mixin.chunk;
 
 import dev.corgitaco.ohthetreesyoullgrow.Constants;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.storage.LegacyTagStrippingVisitor;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -42,6 +44,16 @@ public class MixinChunkSerializer {
         }
     }
 
+
+    @Inject(method = "read", at = @At("RETURN"))
+    private static void ohthetreesyoullgrow$markLegacyTicksStripped(ServerLevel serverLevel, PoiManager poiManager, ChunkPos pos, CompoundTag tag, CallbackInfoReturnable<ProtoChunk> cir) {
+        if (tag.get(Constants.MOD_ID) instanceof CompoundTag corgiLibTag && corgiLibTag.contains(LegacyTagStrippingVisitor.STRIPPED_MARKER)) {
+            corgiLibTag.remove(LegacyTagStrippingVisitor.STRIPPED_MARKER);
+            ProtoChunk chunk = cir.getReturnValue();
+            ChunkAccess target = chunk instanceof ImposterProtoChunk imposter ? imposter.getWrapped() : chunk;
+            target.setUnsaved(true);
+        }
+    }
 
     @Inject(method = "read", at = @At("RETURN"))
     private static void readScheduledRandomTicks(ServerLevel serverLevel, PoiManager poiManager, ChunkPos pos, CompoundTag tag, CallbackInfoReturnable<ProtoChunk> cir) {
