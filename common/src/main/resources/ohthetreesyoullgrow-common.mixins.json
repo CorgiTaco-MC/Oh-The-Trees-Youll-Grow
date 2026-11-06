@@ -7,7 +7,8 @@
     "MixinServerLevel",
     "chunk.MixinChunkAccess",
     "chunk.MixinChunkSerializer",
-    "chunk.MixinLevelChunk"
+    "chunk.MixinLevelChunk",
+    "chunk.MixinRegionFileStorage"
   ],
   "client": [
   ],
