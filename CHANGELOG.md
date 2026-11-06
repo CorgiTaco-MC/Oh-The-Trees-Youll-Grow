@@ -1,3 +1,7 @@
+# 5.3.6
+* Clear oversized random tick tags.
+* Fix blocks generating above the nether roof.
+
 # 5.3.5
 * fix a memory leak caused by improper scheduled tick storage and loading
 
