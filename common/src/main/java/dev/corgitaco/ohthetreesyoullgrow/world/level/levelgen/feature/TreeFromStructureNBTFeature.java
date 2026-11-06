@@ -176,7 +176,7 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
     private static boolean testHeightLimit(TreeFromStructureNBTConfig config, WorldGenLevel level, Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions) {
         ChunkGenerator generator = level.getLevel().getChunkSource().getGenerator();
         int chunkGeneratorMaxY = generator.getGenDepth() + generator.getMinY();
-        int maxY = level.getMaxBuildHeight() - 1;
+        int maxY = level.getMaxBuildHeight();
 
         switch (config.heightLimitBehavior()) {
             case DEFAULT -> {
@@ -198,10 +198,10 @@ public class TreeFromStructureNBTFeature extends Feature<TreeFromStructureNBTCon
         return false;
     }
 
-    private static void removeBlocksAboveY(Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions, int chunkGeneratorMaxY) {
-        logPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
-        leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
-        additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= chunkGeneratorMaxY);
+    private static void removeBlocksAboveY(Map<BlockPos, BlockState> logPositions, Map<BlockPos, BlockState> leavePositions, Map<BlockPos, BlockState> additionalPositions, int yLimit) {
+        logPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
+        leavePositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
+        additionalPositions.entrySet().removeIf(entry -> entry.getKey().getY() >= yLimit);
     }
 
     private static boolean testY(Map<BlockPos, BlockState> positions, int yLimit) {
