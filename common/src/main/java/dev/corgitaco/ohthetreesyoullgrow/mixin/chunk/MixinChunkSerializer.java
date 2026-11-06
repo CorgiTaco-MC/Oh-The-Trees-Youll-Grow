@@ -2,12 +2,14 @@ package dev.corgitaco.ohthetreesyoullgrow.mixin.chunk;
 
 import dev.corgitaco.ohthetreesyoullgrow.Constants;
 import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.RandomTickScheduler;
+import dev.corgitaco.ohthetreesyoullgrow.world.level.chunk.storage.LegacyTagStrippingVisitor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
@@ -43,8 +45,14 @@ public class MixinChunkSerializer {
 
     @Inject(method = "read", at = @At("RETURN"))
     private static void readScheduledRandomTicks(ServerLevel level, PoiManager poiManager, RegionStorageInfo regionStorageInfo, ChunkPos pos, CompoundTag tag, CallbackInfoReturnable<ProtoChunk> cir) {
-        if (tag.contains(Constants.MOD_ID)) {
+        if (tag.contains(Constants.MOD_ID, Tag.TAG_COMPOUND)) {
             CompoundTag corgiLibTag = tag.getCompound(Constants.MOD_ID);
+            if (corgiLibTag.contains(LegacyTagStrippingVisitor.STRIPPED_MARKER)) {
+                corgiLibTag.remove(LegacyTagStrippingVisitor.STRIPPED_MARKER);
+                ProtoChunk chunk = cir.getReturnValue();
+                ChunkAccess target = chunk instanceof ImposterProtoChunk imposter ? imposter.getWrapped() : chunk;
+                target.setUnsaved(true);
+            }
             if (corgiLibTag.contains("scheduled_random_ticks_v2", Tag.TAG_LIST)) {
                 for (Tag scheduledTick : corgiLibTag.getList("scheduled_random_ticks_v2", Tag.TAG_INT_ARRAY)) {
                     int[] intArrayTag = ((IntArrayTag) scheduledTick).getAsIntArray();
